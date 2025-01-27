@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "204607301109",
+    "project_id": "sorugami-70f45",
+    "storage_bucket": "sorugami-70f45.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:204607301109:android:08b8cc9fdd8bae4d2cacbc",
+        "android_client_info": {
+          "package_name": "com.sorugami.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "204607301109-l7r9mcumrqae3255mqfrk4c6ilto6mor.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.sorugami.app",
+            "certificate_hash": "0f5b0ccd3416f1ed42754510902f85eedd9c85fe"
+          }
+        },
+        {
+          "client_id": "204607301109-inu1ta949bir1qe7s80bare008g9fj4a.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDxrqBEqd056Pz_K2z8yKy-6oaZC8kBl7M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "204607301109-inu1ta949bir1qe7s80bare008g9fj4a.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "204607301109-aa58lrud1vj4cc25egdsunp1nuvo4n6h.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.sorugami.app"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
