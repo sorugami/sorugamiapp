@@ -21,8 +21,7 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen>
-    with TickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMixin {
   late AnimationController _logoAnimationController;
   late Animation<double> _logoScaleUpAnimation;
   late Animation<double> _logoScaleDownAnimation;
@@ -82,8 +81,7 @@ class _SplashScreenState extends State<SplashScreen>
       gameId: context.read<SystemConfigCubit>().unityGameId,
       testMode: true,
       onComplete: () => log('Initialized', name: 'Unity Ads'),
-      onFailed: (err, msg) =>
-          log('Initialization Failed: $err $msg', name: 'Unity Ads'),
+      onFailed: (err, msg) => log('Initialization Failed: $err $msg', name: 'Unity Ads'),
     );
   }
 
@@ -97,24 +95,19 @@ class _SplashScreenState extends State<SplashScreen>
 
     await _initUnityAds();
 
-    final showIntroSlider =
-        context.read<SettingsCubit>().state.settingsModel!.showIntroSlider;
+    final showIntroSlider = context.read<SettingsCubit>().state.settingsModel!.showIntroSlider;
     final currAuthState = context.read<AuthCubit>().state;
 
     if (showIntroSlider) {
       /// Set Default Quiz Language
       if (context.read<SystemConfigCubit>().isLanguageModeEnabled) {
-        final defaultQuizLanguage = context
-            .read<SystemConfigCubit>()
-            .supportedQuizLanguages
-            .firstWhere((e) => e.isDefault);
+        final defaultQuizLanguage = context.read<SystemConfigCubit>().supportedQuizLanguages.firstWhere((e) => e.isDefault);
 
         context.read<QuizLanguageCubit>().languageId = defaultQuizLanguage.id;
       }
 
       /// Navigate to language select screen if more than one language is available
-      if (context.read<AppLocalizationCubit>().state.systemLanguages.length >
-          1) {
+      if (context.read<AppLocalizationCubit>().state.systemLanguages.length > 1) {
         await Navigator.of(context).pushReplacementNamed(Routes.languageSelect);
       } else {
         await Navigator.of(context).pushReplacementNamed(Routes.introSlider);
@@ -182,8 +175,7 @@ class _SplashScreenState extends State<SplashScreen>
                     child: AnimatedBuilder(
                       animation: _logoAnimationController,
                       builder: (_, __) => Transform.scale(
-                        scale: _logoScaleUpAnimation.value -
-                            _logoScaleDownAnimation.value,
+                        scale: _logoScaleUpAnimation.value - _logoScaleDownAnimation.value,
                         child: QImage(
                           imageUrl: _appLogoPath,
                           width: 200,
@@ -195,16 +187,17 @@ class _SplashScreenState extends State<SplashScreen>
                   ),
                 ),
 
-                /// Organization Logo
-                if (showCompanyLogo) ...[
-                  Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 22),
-                      child: QImage(imageUrl: _orgLogoPath),
-                    ),
-                  ),
-                ],
+                //TODO: We don't use any company logo currently
+                // /// Organization Logo
+                // if (showCompanyLogo) ...[
+                //   Align(
+                //     alignment: Alignment.bottomCenter,
+                //     child: Padding(
+                //       padding: const EdgeInsets.only(bottom: 22),
+                //       child: QImage(imageUrl: _orgLogoPath),
+                //     ),
+                //   ),
+                // ],
               ],
             ),
           ),

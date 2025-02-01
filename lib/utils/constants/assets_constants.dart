@@ -26,7 +26,7 @@ abstract class Assets {
   static const scratchCardCover = '$_image/scratchCardCover.png';
   static const shareMenuIcon = '$_image/share_icon.svg';
   static const appLogo = '$_image/app_logo.svg';
-  static const splashLogo = '$_image/splash_logo.svg';
+  static const splashLogo = '$_image/splash_logo.png';
   static const statisticsMenuIcon = '$_image/statistics_icon.svg';
   static const termsAndCondIcon = '$_image/termscond_icon.svg';
   static const themeMenuIcon = '$_image/theme_icon.svg';
