@@ -95,11 +95,11 @@ List<String> payoutRequestNotes(
 final payoutMethods = [
   //Paypal
   PayoutMethod(
-    image: 'assets/images/paypal.svg',
-    type: 'Paypal',
+    image: 'assets/images/iban.jpeg',
+    type: 'BANKA',
     inputs: [
       (
-        name: 'Enter paypal id', // Name for the field
+        name: 'Lütfen IBAN numaranızı giriniz', // Name for the field
         isNumber: false, // If input is number or not
         maxLength: 0, // Leave 0 for no limit for input.
       ),
@@ -108,26 +108,13 @@ final payoutMethods = [
 
   //Paytm
   PayoutMethod(
-    image: 'assets/images/paytm.svg',
-    type: 'Paytm',
+    image: 'assets/images/tether.jpeg',
+    type: 'TETHER',
     inputs: [
       (
-        name: 'Enter mobile number',
+        name: 'Tether (USDT) adresinizi giriniz',
         isNumber: true,
         maxLength: 10,
-      ),
-    ],
-  ),
-
-  //UPI
-  PayoutMethod(
-    image: 'assets/images/upi.svg',
-    type: 'UPI',
-    inputs: [
-      (
-        name: 'Enter UPI id',
-        isNumber: false,
-        maxLength: 0, // Leave 0 for no limit for input.
       ),
     ],
   ),

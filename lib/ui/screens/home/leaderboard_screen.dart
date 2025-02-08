@@ -5,6 +5,8 @@ import 'dart:developer';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 import 'package:flutterquiz/features/leaderBoard/cubit/leaderboard_all_time_cubit.dart';
 import 'package:flutterquiz/features/leaderBoard/cubit/leaderboard_daily_cubit.dart';
 import 'package:flutterquiz/features/leaderBoard/cubit/leaderboard_monthly_cubit.dart';
@@ -135,14 +137,11 @@ class _LeaderBoardScreen extends State<LeaderBoardScreen> {
     );
   }
 
-  void fetchMonthlyLeaderBoard() =>
-      context.read<LeaderBoardMonthlyCubit>().fetchLeaderBoard('20');
+  void fetchMonthlyLeaderBoard() => context.read<LeaderBoardMonthlyCubit>().fetchLeaderBoard('20');
 
-  void fetchDailyLeaderBoard() =>
-      context.read<LeaderBoardDailyCubit>().fetchLeaderBoard('20');
+  void fetchDailyLeaderBoard() => context.read<LeaderBoardDailyCubit>().fetchLeaderBoard('20');
 
-  void fetchAllTimeLeaderBoard() =>
-      context.read<LeaderBoardAllTimeCubit>().fetchLeaderBoard('20');
+  void fetchAllTimeLeaderBoard() => context.read<LeaderBoardAllTimeCubit>().fetchLeaderBoard('20');
 
   Widget noLeaderboard(VoidCallback onTapRetry) => Center(
         child: ErrorContainer(
@@ -195,13 +194,13 @@ class _LeaderBoardScreen extends State<LeaderBoardScreen> {
               children: [
                 topThreeRanks(dailyList),
                 leaderBoardList(dailyList, controllerD, hasMore: hasMore),
-                if (LeaderBoardDailyCubit.scoreD != '0' &&
-                    int.parse(LeaderBoardDailyCubit.rankD) > 3)
+                if (LeaderBoardDailyCubit.scoreD != '0' && int.parse(LeaderBoardDailyCubit.rankD) > 3)
                   myRank(
                     LeaderBoardDailyCubit.rankD,
                     LeaderBoardDailyCubit.profileD,
                     LeaderBoardDailyCubit.scoreD,
                   ),
+                const SizedBox(height: 36),
               ],
             ),
           );
@@ -254,8 +253,7 @@ class _LeaderBoardScreen extends State<LeaderBoardScreen> {
               children: [
                 topThreeRanks(monthlyList),
                 leaderBoardList(monthlyList, controllerM, hasMore: hasMore),
-                if (LeaderBoardMonthlyCubit.scoreM != '0' &&
-                    int.parse(LeaderBoardMonthlyCubit.rankM) > 3)
+                if (LeaderBoardMonthlyCubit.scoreM != '0' && int.parse(LeaderBoardMonthlyCubit.rankM) > 3)
                   myRank(
                     LeaderBoardMonthlyCubit.rankM,
                     LeaderBoardMonthlyCubit.profileM,
@@ -311,8 +309,7 @@ class _LeaderBoardScreen extends State<LeaderBoardScreen> {
               children: [
                 topThreeRanks(allTimeList),
                 leaderBoardList(allTimeList, controllerA, hasMore: hasMore),
-                if (LeaderBoardAllTimeCubit.scoreA != '0' &&
-                    int.parse(LeaderBoardAllTimeCubit.rankA) > 3)
+                if (LeaderBoardAllTimeCubit.scoreA != '0' && int.parse(LeaderBoardAllTimeCubit.rankA) > 3)
                   myRank(
                     LeaderBoardAllTimeCubit.rankA,
                     LeaderBoardAllTimeCubit.profileA,
@@ -339,8 +336,7 @@ class _LeaderBoardScreen extends State<LeaderBoardScreen> {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10),
         child: Column(
-          mainAxisAlignment:
-              idx == 0 ? MainAxisAlignment.start : MainAxisAlignment.center,
+          mainAxisAlignment: idx == 0 ? MainAxisAlignment.start : MainAxisAlignment.center,
           children: [
             SizedBox(
               height: imageSize,
@@ -379,9 +375,7 @@ class _LeaderBoardScreen extends State<LeaderBoardScreen> {
             ),
             const SizedBox(height: 10),
             Text(
-              circleList[idx]['name']!.toString().isNotEmpty
-                  ? circleList[idx]['name']!.toString()
-                  : '...',
+              circleList[idx]['name']!.toString().isNotEmpty ? circleList[idx]['name']!.toString() : '...',
               overflow: TextOverflow.ellipsis,
               maxLines: 1,
               textAlign: TextAlign.center,
@@ -411,45 +405,78 @@ class _LeaderBoardScreen extends State<LeaderBoardScreen> {
     return Container(
       padding: const EdgeInsets.only(top: 10, left: 10, right: 10),
       width: width,
-      height: height * 0.29,
+      height: height * 0.31,
       decoration: BoxDecoration(
         borderRadius: const BorderRadius.vertical(bottom: Radius.circular(10)),
         color: Theme.of(context).colorScheme.surface,
       ),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final maxHeight = constraints.maxHeight;
+      child: Column(
+        children: [
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final maxHeight = constraints.maxHeight;
 
-          return Row(
-            children: [
-              /// Rank 2
-              Expanded(
-                flex: 2,
-                child: circleList.length > 1
-                    ? rank(maxHeight, 1)
-                    : const SizedBox.shrink(),
-              ),
+                return Row(
+                  children: [
+                    /// Rank 2
+                    Expanded(
+                      flex: 2,
+                      child: circleList.length > 1 ? rank(maxHeight, 1) : const SizedBox.shrink(),
+                    ),
 
-              /// Rank 1
-              Expanded(
-                flex: 3,
-                child: circleList.isNotEmpty
-                    ? rank(maxHeight, 0)
-                    : const SizedBox.shrink(),
-              ),
+                    /// Rank 1
+                    Expanded(
+                      flex: 3,
+                      child: circleList.isNotEmpty ? rank(maxHeight, 0) : const SizedBox.shrink(),
+                    ),
 
-              /// Rank 3
-              Expanded(
-                flex: 2,
-                child: circleList.length > 2
-                    ? rank(maxHeight, 2)
-                    : const SizedBox.shrink(),
+                    /// Rank 3
+                    Expanded(
+                      flex: 2,
+                      child: circleList.length > 2 ? rank(maxHeight, 2) : const SizedBox.shrink(),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16.0),
+            child: GestureDetector(
+              onTap: () async {
+                await _launchURL();
+              },
+              child: Text(
+                'Ödülleri görmek için tıklayınız.',
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      fontSize: 16,
+                      color: Theme.of(context).primaryColor,
+                      decoration: TextDecoration.underline,
+                      decorationColor: Theme.of(context).primaryColor,
+                    ),
               ),
-            ],
-          );
-        },
+            ),
+          ),
+        ],
       ),
     );
+  }
+
+  Future<void> _launchURL() async {
+    final Uri url = Uri.parse('https://www.sorugami.com/oduller/');
+    try {
+      final launched = await launchUrl(
+        url,
+        mode: LaunchMode.externalApplication,
+      );
+      if (!launched) {
+        throw Exception("Could not launch $url");
+      }
+    } catch (e) {
+      print("Error launching URL: $e");
+      rethrow; // Optionally rethrow the error if needed
+    }
   }
 
   Widget rankCircle(String text, {double size = 25}) {
@@ -539,14 +566,11 @@ class _LeaderBoardScreen extends State<LeaderBoardScreen> {
                                 width: width * .12,
                                 height: height * .3,
                                 decoration: BoxDecoration(
-                                  color: Theme.of(context)
-                                      .primaryColor
-                                      .withValues(alpha: 0.5),
+                                  color: Theme.of(context).primaryColor.withValues(alpha: 0.5),
                                   shape: BoxShape.circle,
                                 ),
                                 child: QImage.circular(
-                                  imageUrl:
-                                      leaderBoard['profile'] as String? ?? '',
+                                  imageUrl: leaderBoard['profile'] as String? ?? '',
                                   width: double.maxFinite,
                                   height: double.maxFinite,
                                 ),

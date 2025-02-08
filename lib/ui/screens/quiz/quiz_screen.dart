@@ -54,13 +54,11 @@ class QuizScreen extends StatefulWidget {
   final String level; //will be in use for quizZone quizType
   final String categoryId; //will be in use for quizZone quizType
   final String subcategoryId; //will be in use for quizZone quizType
-  final String
-      subcategoryMaxLevel; //will be in use for quizZone quizType (to pass in result screen)
+  final String subcategoryMaxLevel; //will be in use for quizZone quizType (to pass in result screen)
   final int unlockedLevel;
   final bool isPlayed; //Only in use when quiz type is audio questions
   final String contestId;
-  final Comprehension
-      comprehension; // will be in use for fun n learn quizType (to pass in result screen)
+  final Comprehension comprehension; // will be in use for fun n learn quizType (to pass in result screen)
 
   // only used for when there is no questions for that category,
   // and showing retry button doesn't make any sense i guess.
@@ -86,8 +84,7 @@ class QuizScreen extends StatefulWidget {
           ),
           //to update user coins after using lifeline
           BlocProvider<UpdateScoreAndCoinsCubit>(
-            create: (_) =>
-                UpdateScoreAndCoinsCubit(ProfileManagementRepository()),
+            create: (_) => UpdateScoreAndCoinsCubit(ProfileManagementRepository()),
           ),
         ],
         child: QuizScreen(
@@ -97,12 +94,10 @@ class QuizScreen extends StatefulWidget {
           categoryId: arguments['categoryId'] as String? ?? '',
           level: arguments['level'] as String? ?? '',
           subcategoryId: arguments['subcategoryId'] as String? ?? '',
-          subcategoryMaxLevel:
-              arguments['subcategoryMaxLevel'] as String? ?? '',
+          subcategoryMaxLevel: arguments['subcategoryMaxLevel'] as String? ?? '',
           unlockedLevel: arguments['unlockedLevel'] as int? ?? 0,
           contestId: arguments['contestId'] as String? ?? '',
-          comprehension: arguments['comprehension'] as Comprehension? ??
-              Comprehension.empty(),
+          comprehension: arguments['comprehension'] as Comprehension? ?? Comprehension.empty(),
           showRetryButton: arguments['showRetryButton'] as bool? ?? true,
           isPremiumCategory: arguments['isPremiumCategory'] as bool? ?? false,
         ),
@@ -117,11 +112,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
   late AnimationController audioTimerController = AnimationController(
     vsync: this,
     duration: Duration(
-      seconds: widget.quizType == QuizTypes.audioQuestions
-          ? context
-              .read<SystemConfigCubit>()
-              .quizTimer(QuizTypes.audioQuestions)
-          : 0,
+      seconds: widget.quizType == QuizTypes.audioQuestions ? context.read<SystemConfigCubit>().quizTimer(QuizTypes.audioQuestions) : 0,
     ),
   );
   late final timerAnimationController = AnimationController(
@@ -142,15 +133,13 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
     vsync: this,
     duration: const Duration(milliseconds: 500),
   );
-  late Animation<double> showOptionAnimation =
-      Tween<double>(begin: 0, end: 1).animate(
+  late Animation<double> showOptionAnimation = Tween<double>(begin: 0, end: 1).animate(
     CurvedAnimation(
       parent: showOptionAnimationController,
       curve: Curves.easeInOut,
     ),
   );
-  late List<GlobalKey<AudioQuestionContainerState>> audioQuestionContainerKeys =
-      [];
+  late List<GlobalKey<AudioQuestionContainerState>> audioQuestionContainerKeys = [];
   int currentQuestionIndex = 0;
   final double optionWidth = 0.7;
   final double optionHeight = 0.09;
@@ -338,15 +327,11 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
 
   //if user has submitted the answer for current question
   bool hasSubmittedAnswerForCurrentQuestion() {
-    return context
-        .read<QuestionsCubit>()
-        .questions()[currentQuestionIndex]
-        .attempted;
+    return context.read<QuestionsCubit>().questions()[currentQuestionIndex].attempted;
   }
 
   Map<String, LifelineStatus> getLifeLines() {
-    if (widget.quizType == QuizTypes.quizZone ||
-        widget.quizType == QuizTypes.dailyQuiz) {
+    if (widget.quizType == QuizTypes.quizZone || widget.quizType == QuizTypes.dailyQuiz) {
       return lifelines;
     }
     return {};
@@ -364,20 +349,13 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
   //update answer locally and on cloud
   Future<void> submitAnswer(String submittedAnswer) async {
     timerAnimationController.stop(canceled: false);
-    if (!context
-        .read<QuestionsCubit>()
-        .questions()[currentQuestionIndex]
-        .attempted) {
+    if (!context.read<QuestionsCubit>().questions()[currentQuestionIndex].attempted) {
       context.read<QuestionsCubit>().updateQuestionWithAnswerAndLifeline(
             context.read<QuestionsCubit>().questions()[currentQuestionIndex].id,
             submittedAnswer,
             context.read<UserDetailsCubit>().getUserFirebaseId(),
-            context
-                .read<SystemConfigCubit>()
-                .quizCorrectAnswerCreditScore(widget.quizType),
-            context
-                .read<SystemConfigCubit>()
-                .quizWrongAnswerDeductScore(widget.quizType),
+            context.read<SystemConfigCubit>().quizCorrectAnswerCreditScore(widget.quizType),
+            context.read<SystemConfigCubit>().quizWrongAnswerDeductScore(widget.quizType),
           );
       updateTotalSecondsToCompleteQuiz();
       await timerAnimationController.reverse();
@@ -386,12 +364,10 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
         const Duration(seconds: inBetweenQuestionTimeInSeconds),
       );
 
-      if (currentQuestionIndex !=
-          (context.read<QuestionsCubit>().questions().length - 1)) {
+      if (currentQuestionIndex != (context.read<QuestionsCubit>().questions().length - 1)) {
         changeQuestion();
         //if quizType is not audio or latex(math or chemistry) then start timer again
-        if (widget.quizType == QuizTypes.audioQuestions ||
-            widget.quizType == QuizTypes.mathMania) {
+        if (widget.quizType == QuizTypes.audioQuestions || widget.quizType == QuizTypes.mathMania) {
           timerAnimationController.value = 0.0;
           await showOptionAnimationController.forward();
         } else {
@@ -415,8 +391,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
   }
 
   bool hasEnoughCoinsForLifeline(BuildContext context) {
-    final currentCoins =
-        int.parse(context.read<UserDetailsCubit>().getCoins()!);
+    final currentCoins = int.parse(context.read<UserDetailsCubit>().getCoins()!);
     //cost of using lifeline is 5 coins
     if (currentCoins < context.read<SystemConfigCubit>().lifelinesDeductCoins) {
       return false;
@@ -446,9 +421,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
               onTap: () {
                 if (!showOptionAnimationController.isAnimating) {
                   showOptionAnimationController.reverse();
-                  audioQuestionContainerKeys[currentQuestionIndex]
-                      .currentState!
-                      .changeShowOption();
+                  audioQuestionContainerKeys[currentQuestionIndex].currentState!.changeShowOption();
                   timerAnimationController.forward(from: 0);
                 }
               },
@@ -469,18 +442,13 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
   Widget _buildLifelineContainer({
     required String title,
     required String icon,
+    String? description,
     VoidCallback? onTap,
   }) {
     final onTertiary = Theme.of(context).colorScheme.onTertiary;
 
     return GestureDetector(
-      onTap: title == fiftyFifty &&
-              context
-                      .read<QuestionsCubit>()
-                      .questions()[currentQuestionIndex]
-                      .answerOptions!
-                      .length ==
-                  2
+      onTap: title == fiftyFifty && context.read<QuestionsCubit>().questions()[currentQuestionIndex].answerOptions!.length == 2
           ? () {
               UiUtils.showSnackBar(
                 context.tr('notAvailable')!,
@@ -488,23 +456,30 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
               );
             }
           : onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: onTertiary.withValues(alpha: 0.6)),
-        ),
-        width: isSmallDevice ? 65.0 : 75.0,
-        height: isSmallDevice ? 45.0 : 55.0,
-        padding: const EdgeInsets.all(11),
-        child: SvgPicture.asset(
-          icon,
-          colorFilter: ColorFilter.mode(
-            lifelines[title] == LifelineStatus.unused
-                ? onTertiary
-                : onTertiary.withValues(alpha: 0.6),
-            BlendMode.srcIn,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: onTertiary.withValues(alpha: 0.6)),
+            ),
+            width: isSmallDevice ? 65.0 : 75.0,
+            height: isSmallDevice ? 45.0 : 55.0,
+            padding: const EdgeInsets.all(11),
+            child: SvgPicture.asset(
+              icon,
+              colorFilter: ColorFilter.mode(
+                lifelines[title] == LifelineStatus.unused ? onTertiary : onTertiary.withValues(alpha: 0.6),
+                BlendMode.srcIn,
+              ),
+            ),
           ),
-        ),
+          Text(
+            description ?? '',
+            style: TextStyle(color: lifelines[title] == LifelineStatus.unused ? onTertiary : onTertiary.withValues(alpha: 0.6)),
+          ),
+        ],
       ),
     );
   }
@@ -542,9 +517,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
   void _addCoinsAfterRewardAd() {
     final rewardAdsCoins = context.read<SystemConfigCubit>().rewardAdsCoins;
 
-    context
-        .read<UserDetailsCubit>()
-        .updateCoins(addCoin: true, coins: rewardAdsCoins);
+    context.read<UserDetailsCubit>().updateCoins(addCoin: true, coins: rewardAdsCoins);
     context.read<UpdateScoreAndCoinsCubit>().updateCoins(
           coins: rewardAdsCoins,
           addCoin: true,
@@ -595,8 +568,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
   bool get isSmallDevice => MediaQuery.sizeOf(context).width <= 360;
 
   Widget _buildLifeLines() {
-    if (widget.quizType == QuizTypes.dailyQuiz ||
-        widget.quizType == QuizTypes.quizZone) {
+    if (widget.quizType == QuizTypes.dailyQuiz || widget.quizType == QuizTypes.quizZone) {
       return Container(
         alignment: Alignment.bottomCenter,
         padding: EdgeInsets.only(
@@ -605,12 +577,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            if (context
-                    .read<QuestionsCubit>()
-                    .questions()[currentQuestionIndex]
-                    .answerOptions!
-                    .length !=
-                2) ...[
+            if (context.read<QuestionsCubit>().questions()[currentQuestionIndex].answerOptions!.length != 2) ...[
               _buildLifelineContainer(
                 onTap: () {
                   if (lifelines[fiftyFifty] == LifelineStatus.unused) {
@@ -629,20 +596,13 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
                       }
 
                       if (hasEnoughCoinsForLifeline(context)) {
-                        if (context
-                                .read<QuestionsCubit>()
-                                .questions()[currentQuestionIndex]
-                                .answerOptions!
-                                .length ==
-                            2) {
+                        if (context.read<QuestionsCubit>().questions()[currentQuestionIndex].answerOptions!.length == 2) {
                           UiUtils.showSnackBar(
                             context.tr('notAvailable')!,
                             context,
                           );
                         } else {
-                          final lifeLineDeductCoins = context
-                              .read<SystemConfigCubit>()
-                              .lifelinesDeductCoins;
+                          final lifeLineDeductCoins = context.read<SystemConfigCubit>().lifelinesDeductCoins;
                           //deduct coins for using lifeline
                           context.read<UserDetailsCubit>().updateCoins(
                                 addCoin: false,
@@ -677,6 +637,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
                 },
                 title: fiftyFifty,
                 icon: Assets.fiftyFiftyLifeline,
+                description: '%50 Joker',
               ),
               _buildLifelineContainer(
                 onTap: () {
@@ -697,9 +658,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
                         return;
                       }
                       if (hasEnoughCoinsForLifeline(context)) {
-                        final lifeLineDeductCoins = context
-                            .read<SystemConfigCubit>()
-                            .lifelinesDeductCoins;
+                        final lifeLineDeductCoins = context.read<SystemConfigCubit>().lifelinesDeductCoins;
                         //deduct coins for using lifeline
                         context.read<UserDetailsCubit>().updateCoins(
                               addCoin: false,
@@ -732,6 +691,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
                 },
                 title: audiencePoll,
                 icon: Assets.audiencePollLifeline,
+                description: 'Anket Yap',
               ),
             ],
             _buildLifelineContainer(
@@ -747,8 +707,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
                     return;
                   }
                   if (hasEnoughCoinsForLifeline(context)) {
-                    final lifeLineDeductCoins =
-                        context.read<SystemConfigCubit>().lifelinesDeductCoins;
+                    final lifeLineDeductCoins = context.read<SystemConfigCubit>().lifelinesDeductCoins;
                     //deduct coins for using lifeline
                     context.read<UserDetailsCubit>().updateCoins(
                           addCoin: false,
@@ -784,6 +743,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
               },
               title: resetTime,
               icon: Assets.resetTimeLifeline,
+              description: 'Süre uzat',
             ),
             if (context.read<QuestionsCubit>().questions().length > 1) ...[
               _buildLifelineContainer(
@@ -798,15 +758,11 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
                     }
                     if (hasEnoughCoinsForLifeline(context)) {
                       //deduct coins for using lifeline
-                      context
-                          .read<UserDetailsCubit>()
-                          .updateCoins(addCoin: false, coins: 5);
+                      context.read<UserDetailsCubit>().updateCoins(addCoin: false, coins: 5);
                       //update coins in cloud
 
                       context.read<UpdateScoreAndCoinsCubit>().updateCoins(
-                            coins: context
-                                .read<SystemConfigCubit>()
-                                .lifelinesDeductCoins,
+                            coins: context.read<SystemConfigCubit>().lifelinesDeductCoins,
                             addCoin: false,
                             title: usedSkipLifelineKey,
                           );
@@ -830,6 +786,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
                 },
                 title: skip,
                 icon: Assets.skipQueLifeline,
+                description: 'Soruyu Atla',
               ),
             ],
           ],
@@ -839,12 +796,9 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
     return const SizedBox();
   }
 
-  Duration get timer =>
-      timerAnimationController.duration! -
-      (timerAnimationController.lastElapsedDuration ?? Duration.zero);
+  Duration get timer => timerAnimationController.duration! - (timerAnimationController.lastElapsedDuration ?? Duration.zero);
 
-  String get remaining =>
-      "${timer.inMinutes.remainder(60).toString().padLeft(2, '0')}:${timer.inSeconds.remainder(60).toString().padLeft(2, '0')}";
+  String get remaining => "${timer.inMinutes.remainder(60).toString().padLeft(2, '0')}:${timer.inSeconds.remainder(60).toString().padLeft(2, '0')}";
 
   @override
   Widget build(BuildContext context) {
@@ -864,8 +818,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
         listener: (_, state) {
           if (state is QuestionsFetchSuccess) {
             if (state.questions.isNotEmpty) {
-              if (currentQuestionIndex == 0 &&
-                  !state.questions[currentQuestionIndex].attempted) {
+              if (currentQuestionIndex == 0 && !state.questions[currentQuestionIndex].attempted) {
                 if (widget.quizType == QuizTypes.audioQuestions) {
                   for (final _ in state.questions) {
                     audioQuestionContainerKeys.add(
@@ -906,11 +859,8 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
               body: Center(
                 child: ErrorContainer(
                   showBackButton: true,
-                  errorMessage:
-                      convertErrorCodeToLanguageKey(state.errorMessage),
-                  showRTryButton: widget.showRetryButton &&
-                      convertErrorCodeToLanguageKey(state.errorMessage) !=
-                          dailyQuizAlreadyPlayedKey,
+                  errorMessage: convertErrorCodeToLanguageKey(state.errorMessage),
+                  showRTryButton: widget.showRetryButton && convertErrorCodeToLanguageKey(state.errorMessage) != dailyQuizAlreadyPlayedKey,
                   onTapRetry: _getQuestions,
                   showErrorImage: true,
                 ),
@@ -935,10 +885,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onTertiary
-                                  .withValues(alpha: 0.4),
+                              color: Theme.of(context).colorScheme.onTertiary.withValues(alpha: 0.4),
                               width: 4,
                             ),
                           ),
@@ -958,10 +905,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
                     : TextCircularTimer(
                         animationController: timerAnimationController,
                         arcColor: Theme.of(context).primaryColor,
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onTertiary
-                            .withValues(alpha: 0.2),
+                        color: Theme.of(context).colorScheme.onTertiary.withValues(alpha: 0.2),
                       ),
               ),
               body: Stack(
@@ -978,8 +922,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
                           UiUtils.getQuestionContainerTopPaddingPercentage(
                             context.height,
                           ),
-                      hasSubmittedAnswerForCurrentQuestion:
-                          hasSubmittedAnswerForCurrentQuestion,
+                      hasSubmittedAnswerForCurrentQuestion: hasSubmittedAnswerForCurrentQuestion,
                       questions: context.read<QuestionsCubit>().questions(),
                       submitAnswer: submitAnswer,
                       questionContentAnimation: questionContentAnimation,
@@ -988,8 +931,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
                       questionSlideAnimation: questionSlideAnimation,
                       currentQuestionIndex: currentQuestionIndex,
                       questionAnimationController: questionAnimationController,
-                      questionContentAnimationController:
-                          questionContentAnimationController,
+                      questionContentAnimationController: questionContentAnimationController,
                       guessTheWordQuestions: const [],
                       guessTheWordQuestionContainerKeys: const [],
                       level: widget.level,

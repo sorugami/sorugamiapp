@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:flutterquiz/features/profile_management/cubits/user_details_cubit.dart';
 import 'package:flutterquiz/features/system_config/cubits/system_config_cubit.dart';
 import 'package:flutterquiz/features/wallet/cubits/payment_request_cubit.dart';
@@ -28,18 +27,11 @@ class RedeemAmountRequestBottomSheetContainer extends StatefulWidget {
   final PaymentRequestCubit paymentRequestCubit;
 
   @override
-  State<RedeemAmountRequestBottomSheetContainer> createState() =>
-      _RedeemAmountRequestBottomSheetContainerState();
+  State<RedeemAmountRequestBottomSheetContainer> createState() => _RedeemAmountRequestBottomSheetContainerState();
 }
 
-class _RedeemAmountRequestBottomSheetContainerState
-    extends State<RedeemAmountRequestBottomSheetContainer>
-    with TickerProviderStateMixin {
-  late final List<TextEditingController> _inputDetailsControllers =
-      payoutMethods[_selectedPaymentMethodIndex]
-          .inputs
-          .map((e) => TextEditingController())
-          .toList();
+class _RedeemAmountRequestBottomSheetContainerState extends State<RedeemAmountRequestBottomSheetContainer> with TickerProviderStateMixin {
+  late final List<TextEditingController> _inputDetailsControllers = payoutMethods[_selectedPaymentMethodIndex].inputs.map((e) => TextEditingController()).toList();
 
   late double _selectPaymentMethodDx = 0;
 
@@ -66,37 +58,39 @@ class _RedeemAmountRequestBottomSheetContainerState
           }
         });
       },
-      child: Container(
-        padding: const EdgeInsets.all(10),
-        margin: const EdgeInsets.symmetric(horizontal: 5),
-        width: context.width * .175,
-        height: context.width * .175,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: _selectedPaymentMethodIndex == paymentMethodIndex
-                ? Colors.transparent
-                : Theme.of(context)
-                    .colorScheme
-                    .onTertiary
-                    .withValues(alpha: 0.6),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(4),
+            margin: const EdgeInsets.symmetric(horizontal: 5),
+            width: context.width * .175,
+            height: context.width * .175,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: _selectedPaymentMethodIndex == paymentMethodIndex ? Theme.of(context).primaryColor : Colors.transparent,
+              ),
+              color: Theme.of(context).scaffoldBackgroundColor,
+            ),
+            child: Image.asset(
+              payoutMethods[paymentMethodIndex].image,
+              fit: BoxFit.cover,
+            ),
           ),
-          color: _selectedPaymentMethodIndex == paymentMethodIndex
-              ? Theme.of(context).primaryColor
-              : Theme.of(context).scaffoldBackgroundColor,
-        ),
-        child: SvgPicture.asset(payoutMethods[paymentMethodIndex].image),
+          Text(
+            payoutMethods[paymentMethodIndex].type,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(color: Theme.of(context).primaryColor),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildInputDetailsContainer(int inputDetailsIndex) {
-    final input =
-        payoutMethods[_selectedPaymentMethodIndex].inputs[inputDetailsIndex];
+    final input = payoutMethods[_selectedPaymentMethodIndex].inputs[inputDetailsIndex];
 
-    final inputFormatters = input.isNumber
-        ? [FilteringTextInputFormatter.digitsOnly]
-        : <TextInputFormatter>[];
+    final inputFormatters = input.isNumber ? [FilteringTextInputFormatter.digitsOnly] : <TextInputFormatter>[];
     if (input.maxLength > 0) {
       inputFormatters.add(
         LengthLimitingTextInputFormatter(input.maxLength),
@@ -127,8 +121,7 @@ class _RedeemAmountRequestBottomSheetContainerState
           hintText: input.name,
           hintStyle: TextStyle(
             fontSize: 16,
-            color:
-                Theme.of(context).colorScheme.onTertiary.withValues(alpha: .6),
+            color: Theme.of(context).colorScheme.onTertiary.withValues(alpha: .6),
           ),
         ),
       ),
@@ -139,8 +132,7 @@ class _RedeemAmountRequestBottomSheetContainerState
     final mqSize = context;
     return AnimatedContainer(
       curve: Curves.easeInOut,
-      transform: Matrix4.identity()
-        ..setEntry(0, 3, mqSize.width * _enterPayoutMethodDx),
+      transform: Matrix4.identity()..setEntry(0, 3, mqSize.width * _enterPayoutMethodDx),
       duration: const Duration(milliseconds: 500),
       child: BlocConsumer<PaymentRequestCubit, PaymentRequestState>(
         listener: (context, state) {
@@ -226,8 +218,7 @@ class _RedeemAmountRequestBottomSheetContainerState
 
               SizedBox(height: mqSize.height * .025),
 
-              for (var i = 0; i < payoutMethod.inputs.length; i++)
-                _buildInputDetailsContainer(i),
+              for (var i = 0; i < payoutMethod.inputs.length; i++) _buildInputDetailsContainer(i),
 
               SizedBox(height: mqSize.height * (0.01)),
 
@@ -256,9 +247,7 @@ class _RedeemAmountRequestBottomSheetContainerState
                 child: CustomRoundedButton(
                   widthPercentage: 1,
                   backgroundColor: Theme.of(context).primaryColor,
-                  buttonTitle: state is PaymentRequestInProgress
-                      ? context.tr(requestingKey)
-                      : context.tr(makeRequestKey),
+                  buttonTitle: state is PaymentRequestInProgress ? context.tr(requestingKey) : context.tr(makeRequestKey),
                   radius: 10,
                   showBorder: false,
                   titleColor: Theme.of(context).colorScheme.surface,
@@ -266,8 +255,7 @@ class _RedeemAmountRequestBottomSheetContainerState
                   textSize: 18,
                   onTap: () {
                     var isAnyInputFieldEmpty = false;
-                    for (final textEditingController
-                        in _inputDetailsControllers) {
+                    for (final textEditingController in _inputDetailsControllers) {
                       if (textEditingController.text.trim().isEmpty) {
                         isAnyInputFieldEmpty = true;
 
@@ -285,9 +273,7 @@ class _RedeemAmountRequestBottomSheetContainerState
                     widget.paymentRequestCubit.makePaymentRequest(
                       paymentType: payoutMethod.type,
                       paymentAddress: jsonEncode(
-                        _inputDetailsControllers
-                            .map((e) => e.text.trim())
-                            .toList(),
+                        _inputDetailsControllers.map((e) => e.text.trim()).toList(),
                       ),
                       paymentAmount: widget.redeemableAmount.toString(),
                       coinUsed: widget.deductedCoins.toString(),
@@ -334,8 +320,7 @@ class _RedeemAmountRequestBottomSheetContainerState
     final mqSize = context;
     return AnimatedContainer(
       curve: Curves.easeInOut,
-      transform: Matrix4.identity()
-        ..setEntry(0, 3, mqSize.width * _selectPaymentMethodDx),
+      transform: Matrix4.identity()..setEntry(0, 3, mqSize.width * _selectPaymentMethodDx),
       duration: const Duration(milliseconds: 500),
       child: Column(
         children: [

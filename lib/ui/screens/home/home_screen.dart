@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -38,6 +39,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:popover/popover.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({required this.isGuest, super.key});
@@ -55,8 +57,7 @@ class HomeScreen extends StatefulWidget {
             create: (_) => ReferAndEarnCubit(AuthRepository()),
           ),
           BlocProvider<UpdateScoreAndCoinsCubit>(
-            create: (_) =>
-                UpdateScoreAndCoinsCubit(ProfileManagementRepository()),
+            create: (_) => UpdateScoreAndCoinsCubit(ProfileManagementRepository()),
           ),
           BlocProvider<UpdateUserDetailCubit>(
             create: (_) => UpdateUserDetailCubit(ProfileManagementRepository()),
@@ -68,7 +69,7 @@ class HomeScreen extends StatefulWidget {
   }
 }
 
-typedef ZoneType = ({String title, String img, String desc});
+typedef ZoneType = ({String title, String img, String desc, String informationTitle, String informationDescription});
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   /// Quiz Zone globals
@@ -79,34 +80,46 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
   final battleZones = <ZoneType>[
-    (title: 'groupPlay', img: Assets.groupBattleIcon, desc: 'desGroupPlay'),
-    (title: 'battleQuiz', img: Assets.oneVsOneIcon, desc: 'desBattleQuiz'),
+    (
+      title: 'groupPlay',
+      img: Assets.groupBattleIcon,
+      desc: 'desGroupPlay',
+      informationDescription: 'Gurup Savaşı Açıklaması',
+      informationTitle: 'Gurup Savaşı',
+    ),
+    (
+      title: 'battleQuiz',
+      img: Assets.oneVsOneIcon,
+      desc: 'desBattleQuiz',
+      informationDescription: '1 v\\s 1 Savaş Açıklama',
+      informationTitle: '1 v\\s 1 Savaş ',
+    ),
   ];
 
   final examZones = <ZoneType>[
-    (title: 'exam', img: Assets.examQuizIcon, desc: 'desExam'),
+    (
+      title: 'exam',
+      img: Assets.examQuizIcon,
+      desc: 'desExam',
+      informationDescription: 'Sınav açıklaması',
+      informationTitle: 'Sınav',
+    ),
     (
       title: 'selfChallenge',
       img: Assets.selfChallengeIcon,
-      desc: 'challengeYourselfLbl'
+      desc: 'challengeYourselfLbl',
+      informationDescription: 'Kendini Test Et açıklaması',
+      informationTitle: 'Kendini Test Et',
     ),
   ];
 
   final playDifferentZones = <ZoneType>[
-    (title: 'dailyQuiz', img: Assets.dailyQuizIcon, desc: 'desDailyQuiz'),
-    (title: 'funAndLearn', img: Assets.funNLearnIcon, desc: 'desFunAndLearn'),
-    (
-      title: 'guessTheWord',
-      img: Assets.guessTheWordIcon,
-      desc: 'desGuessTheWord'
-    ),
-    (
-      title: 'audioQuestions',
-      img: Assets.audioQuizIcon,
-      desc: 'desAudioQuestions'
-    ),
-    (title: 'mathMania', img: Assets.mathsQuizIcon, desc: 'desMathMania'),
-    (title: 'truefalse', img: Assets.trueFalseQuizIcon, desc: 'desTrueFalse'),
+    (title: 'dailyQuiz', img: Assets.dailyQuizIcon, desc: 'desDailyQuiz', informationDescription: 'Günlük Sınav açıklaması', informationTitle: 'Günlük Sınav'),
+    (title: 'funAndLearn', img: Assets.funNLearnIcon, desc: 'desFunAndLearn', informationDescription: 'Dikkatini Görelim açıklaması', informationTitle: 'Dikkatini Görelim'),
+    (title: 'guessTheWord', img: Assets.guessTheWordIcon, desc: 'desGuessTheWord', informationDescription: 'Kelime Oyunu Açıklaması', informationTitle: 'Kelime Oyunu'),
+    (title: 'audioQuestions', img: Assets.audioQuizIcon, desc: 'desAudioQuestions', informationDescription: 'Sesli Sorular açıklaması', informationTitle: 'Sesli Sorular açıklaması'),
+    (title: 'mathMania', img: Assets.mathsQuizIcon, desc: 'desMathMania', informationDescription: 'Özel Sınavlar açıklaması', informationTitle: 'Özel Sınavlar'),
+    (title: 'truefalse', img: Assets.trueFalseQuizIcon, desc: 'desTrueFalse', informationDescription: 'Doğru Yanlış açıklaması', informationTitle: 'Doğru\'Yanlış'),
   ];
 
   // Screen dimensions
@@ -130,8 +143,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   ///
   late String _currLangId;
   late final SystemConfigCubit _sysConfigCubit;
-  final _quizZoneId =
-      UiUtils.getCategoryTypeNumberFromQuizType(QuizTypes.quizZone);
+  final _quizZoneId = UiUtils.getCategoryTypeNumberFromQuizType(QuizTypes.quizZone);
 
   @override
   void initState() {
@@ -183,8 +195,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   Future<void> _initLocalNotification() async {
-    const initializationSettingsAndroid =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+    const initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
     const initializationSettingsIOS = DarwinInitializationSettings();
 
     const initializationSettings = InitializationSettings(
@@ -198,10 +209,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     /// Request Permissions for IOS
     if (Platform.isIOS) {
-      await flutterLocalNotificationsPlugin
-          .resolvePlatformSpecificImplementation<
-              IOSFlutterLocalNotificationsPlugin>()
-          ?.requestPermissions();
+      await flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>()?.requestPermissions();
     }
   }
 
@@ -243,8 +251,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         battleZones.removeWhere((e) => e.title == 'groupPlay');
       }
 
-      if (!_sysConfigCubit.isOneVsOneBattleEnabled &&
-          !_sysConfigCubit.isRandomBattleEnabled) {
+      if (!_sysConfigCubit.isOneVsOneBattleEnabled && !_sysConfigCubit.isRandomBattleEnabled) {
         battleZones.removeWhere((e) => e.title == 'battleQuiz');
       }
       setState(() {});
@@ -257,8 +264,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     await Future<void>.delayed(Duration.zero);
     if (_sysConfigCubit.isForceUpdateEnable) {
       try {
-        final forceUpdate =
-            await UiUtils.forceUpdate(_sysConfigCubit.appVersion);
+        final forceUpdate = await UiUtils.forceUpdate(_sysConfigCubit.appVersion);
 
         if (forceUpdate) {
           setState(() => showUpdateContainer = true);
@@ -336,8 +342,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         await Navigator.of(context).pushNamed(
           Routes.category,
           arguments: {
-            'quizType':
-                _getQuizTypeFromCategory(message.data['type'] as String),
+            'quizType': _getQuizTypeFromCategory(message.data['type'] as String),
           },
         );
       } else if (message.data['type'] == 'badges') {
@@ -559,15 +564,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     context.read<QuizCategoryCubit>().updateState(QuizCategoryInitial());
     if (index == 'groupPlay') {
-      context
-          .read<MultiUserBattleRoomCubit>()
-          .updateState(MultiUserBattleRoomInitial());
+      context.read<MultiUserBattleRoomCubit>().updateState(MultiUserBattleRoomInitial());
 
       Navigator.of(context).push(
         CupertinoPageRoute<void>(
           builder: (_) => BlocProvider<UpdateScoreAndCoinsCubit>(
-            create: (context) =>
-                UpdateScoreAndCoinsCubit(ProfileManagementRepository()),
+            create: (context) => UpdateScoreAndCoinsCubit(ProfileManagementRepository()),
             child: CreateOrJoinRoomScreen(
               quizType: QuizTypes.groupPlay,
               title: context.tr('groupPlay')!,
@@ -587,8 +589,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         Navigator.of(context).push(
           CupertinoPageRoute<CreateOrJoinRoomScreen>(
             builder: (_) => BlocProvider<UpdateScoreAndCoinsCubit>(
-              create: (_) =>
-                  UpdateScoreAndCoinsCubit(ProfileManagementRepository()),
+              create: (_) => UpdateScoreAndCoinsCubit(ProfileManagementRepository()),
               child: CreateOrJoinRoomScreen(
                 quizType: QuizTypes.oneVsOneBattle,
                 title: context.tr('playWithFrdLbl')!,
@@ -638,10 +639,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onTertiary
-                            .withValues(alpha: 0.3),
+                        color: Theme.of(context).colorScheme.onTertiary.withValues(alpha: 0.3),
                       ),
                     ),
                     child: QImage.circular(imageUrl: _userProfileImg),
@@ -664,10 +662,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                         context.tr(letsPlay)!,
                         style: TextStyle(
                           fontSize: 13,
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onTertiary
-                              .withValues(alpha: 0.3),
+                          color: Theme.of(context).primaryColor,
+                          decoration: TextDecoration.underline,
+                          decorationColor: Theme.of(context).primaryColor,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -757,10 +754,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onTertiary
-                        .withValues(alpha: .6),
+                    color: Theme.of(context).colorScheme.onTertiary.withValues(alpha: .6),
                   ),
                 ),
               ),
@@ -817,9 +811,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
-                            !isCateListExpanded
-                                ? Icons.keyboard_arrow_down_rounded
-                                : Icons.keyboard_arrow_up_rounded,
+                            !isCateListExpanded ? Icons.keyboard_arrow_down_rounded : Icons.keyboard_arrow_up_rounded,
                             color: Theme.of(context).primaryColor,
                             size: 32,
                           ),
@@ -880,145 +872,171 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           }
 
           if (!isCateListExpanded) {
-            categoriesToShowCount =
-                categories.length <= minCount ? categories.length : minCount;
+            categoriesToShowCount = categories.length <= minCount ? categories.length : minCount;
           } else {
-            categoriesToShowCount =
-                categories.length <= maxCount ? categories.length : maxCount;
+            categoriesToShowCount = categories.length <= maxCount ? categories.length : maxCount;
           }
 
-          return ListView.builder(
-            padding: const EdgeInsets.only(bottom: 10),
-            shrinkWrap: true,
-            itemCount: categoriesToShowCount,
-            physics: const NeverScrollableScrollPhysics(),
-            itemBuilder: (context, i) {
-              final category = categories[i];
-
-              return ListTile(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-                onTap: () {
-                  if (widget.isGuest) {
-                    _showLoginDialog();
-                    return;
-                  }
-
-                  if (category.isPremium && !category.hasUnlocked) {
-                    showUnlockPremiumCategoryDialog(
-                      context,
-                      categoryId: category.id!,
-                      categoryName: category.categoryName!,
-                      requiredCoins: category.requiredCoins,
-                      isQuizZone: true,
-                    );
-                    return;
-                  }
-
-                  //noOf means how many subcategory it has
-                  //if subcategory is 0 then check for level
-                  if (category.noOf == '0') {
-                    //means this category does not have level
-                    if (category.maxLevel == '0') {
-                      //direct move to quiz screen pass level as 0
-                      Navigator.of(context).pushNamed(
-                        Routes.quiz,
-                        arguments: {
-                          'numberOfPlayer': 1,
-                          'quizType': QuizTypes.quizZone,
-                          'categoryId': category.id,
-                          'subcategoryId': '',
-                          'level': '0',
-                          'subcategoryMaxLevel': '0',
-                          'unlockedLevel': 0,
-                          'contestId': '',
-                          'comprehensionId': '',
-                          'quizName': 'Quiz Zone',
-                          'showRetryButton': category.noOfQues! != '0',
-                        },
-                      );
-                    } else {
-                      Navigator.of(context).pushNamed(
-                        Routes.levels,
-                        arguments: {
-                          'Category': category,
-                        },
-                      );
-                    }
-                  } else {
-                    Navigator.of(context).pushNamed(
-                      Routes.subcategoryAndLevel,
-                      arguments: {
-                        'category_id': category.id,
-                        'category_name': category.categoryName,
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(right: 16, top: 8),
+                child: GestureDetector(
+                  onTap: () {
+                    showPopover(
+                      context: context,
+                      bodyBuilder: (context) {
+                        return CategoryInformationBubbleWidget(
+                          title: 'informationTitle',
+                          description: 'informationDescription',
+                        );
                       },
+                      onPop: () => print('Popover was popped!'),
+                      direction: PopoverDirection.bottom,
+                      width: 300,
+                      height: 200,
                     );
-                  }
-                },
-                horizontalTitleGap: 15,
-                leading: AspectRatio(
-                  aspectRatio: 1,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.transparent,
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(
-                        color: Theme.of(context).scaffoldBackgroundColor,
-                      ),
-                    ),
-                    padding: const EdgeInsets.all(5),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(1),
-                      child: QImage(
-                        imageUrl: category.image!,
-                        fit: BoxFit.fill,
-                      ),
-                    ),
+                  },
+                  child: Text(
+                    'Detaylar',
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                          color: Theme.of(context).primaryColor,
+                          decoration: TextDecoration.underline,
+                          decorationColor: Theme.of(context).primaryColor,
+                        ),
                   ),
                 ),
+              ),
+              ListView.builder(
+                padding: const EdgeInsets.only(bottom: 10),
+                shrinkWrap: true,
+                itemCount: categoriesToShowCount,
+                physics: const NeverScrollableScrollPhysics(),
+                itemBuilder: (context, i) {
+                  final category = categories[i];
 
-                /// right_arrow
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    PremiumCategoryAccessBadge(
-                      hasUnlocked: category.hasUnlocked,
-                      isPremium: category.isPremium,
-                    ),
-                    const SizedBox(width: 10),
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(
-                          color: Theme.of(context).scaffoldBackgroundColor,
+                  return ListTile(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                    onTap: () {
+                      if (widget.isGuest) {
+                        _showLoginDialog();
+                        return;
+                      }
+
+                      if (category.isPremium && !category.hasUnlocked) {
+                        showUnlockPremiumCategoryDialog(
+                          context,
+                          categoryId: category.id!,
+                          categoryName: category.categoryName!,
+                          requiredCoins: category.requiredCoins,
+                          isQuizZone: true,
+                        );
+                        return;
+                      }
+
+                      //noOf means how many subcategory it has
+                      //if subcategory is 0 then check for level
+                      if (category.noOf == '0') {
+                        //means this category does not have level
+                        if (category.maxLevel == '0') {
+                          //direct move to quiz screen pass level as 0
+                          Navigator.of(context).pushNamed(
+                            Routes.quiz,
+                            arguments: {
+                              'numberOfPlayer': 1,
+                              'quizType': QuizTypes.quizZone,
+                              'categoryId': category.id,
+                              'subcategoryId': '',
+                              'level': '0',
+                              'subcategoryMaxLevel': '0',
+                              'unlockedLevel': 0,
+                              'contestId': '',
+                              'comprehensionId': '',
+                              'quizName': 'Quiz Zone',
+                              'showRetryButton': category.noOfQues! != '0',
+                            },
+                          );
+                        } else {
+                          Navigator.of(context).pushNamed(
+                            Routes.levels,
+                            arguments: {
+                              'Category': category,
+                            },
+                          );
+                        }
+                      } else {
+                        Navigator.of(context).pushNamed(
+                          Routes.subcategoryAndLevel,
+                          arguments: {
+                            'category_id': category.id,
+                            'category_name': category.categoryName,
+                          },
+                        );
+                      }
+                    },
+                    horizontalTitleGap: 15,
+                    leading: AspectRatio(
+                      aspectRatio: 1,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.transparent,
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(
+                            color: Theme.of(context).scaffoldBackgroundColor,
+                          ),
+                        ),
+                        padding: const EdgeInsets.all(5),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(1),
+                          child: QImage(
+                            imageUrl: category.image!,
+                            fit: BoxFit.fill,
+                          ),
                         ),
                       ),
-                      padding: const EdgeInsets.all(2),
-                      child: Icon(
-                        Icons.arrow_forward_ios_rounded,
-                        size: 20,
-                        color: Theme.of(context).colorScheme.onTertiary,
+                    ),
+
+                    /// right_arrow
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        PremiumCategoryAccessBadge(
+                          hasUnlocked: category.hasUnlocked,
+                          isPremium: category.isPremium,
+                        ),
+                        const SizedBox(width: 10),
+                        Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(
+                              color: Theme.of(context).scaffoldBackgroundColor,
+                            ),
+                          ),
+                          padding: const EdgeInsets.all(2),
+                          child: Icon(
+                            Icons.arrow_forward_ios_rounded,
+                            size: 20,
+                            color: Theme.of(context).colorScheme.onTertiary,
+                          ),
+                        ),
+                      ],
+                    ),
+                    title: Text(
+                      category.categoryName!,
+                      style: _boldTextStyle.copyWith(fontSize: 16),
+                    ),
+                    subtitle: Text(
+                      category.noOf == '0' ? "${context.tr("questionLbl")}: ${category.noOfQues!}" : "${context.tr('subCategoriesLbl')}: ${category.noOf}",
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Theme.of(context).colorScheme.onTertiary.withValues(alpha: 0.6),
                       ),
                     ),
-                  ],
-                ),
-                title: Text(
-                  category.categoryName!,
-                  style: _boldTextStyle.copyWith(fontSize: 16),
-                ),
-                subtitle: Text(
-                  category.noOf == '0'
-                      ? "${context.tr("questionLbl")}: ${category.noOfQues!}"
-                      : "${context.tr('subCategoriesLbl')}: ${category.noOf}",
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onTertiary
-                        .withValues(alpha: 0.6),
-                  ),
-                ),
-              );
-            },
+                  );
+                },
+              ),
+            ],
           );
         }
 
@@ -1061,6 +1079,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       onTap: () => _onPressedBattle(battleZones[i].title),
                       title: context.tr(battleZones[i].title)!,
                       desc: context.tr(battleZones[i].desc)!,
+                      informationTitle: context.tr(battleZones[i].informationTitle)!,
+                      informationDescription: context.tr(battleZones[i].informationDescription)!,
                       img: battleZones[i].img,
                     ),
                   ),
@@ -1100,6 +1120,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       onTap: () => _onPressedSelfExam(examZones[i].title),
                       title: context.tr(examZones[i].title)!,
                       desc: context.tr(examZones[i].desc)!,
+                      informationTitle: context.tr(examZones[i].informationTitle)!,
+                      informationDescription: context.tr(examZones[i].informationDescription)!,
                       img: examZones[i].img,
                     ),
                   ),
@@ -1143,6 +1165,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 onTap: () => _onPressedZone(playDifferentZones[i].title),
                 title: context.tr(playDifferentZones[i].title)!,
                 desc: context.tr(playDifferentZones[i].desc)!,
+                informationTitle: context.tr(playDifferentZones[i].informationTitle)!,
+                informationDescription: context.tr(playDifferentZones[i].informationDescription)!,
                 img: playDifferentZones[i].img,
               ),
             ),
@@ -1156,14 +1180,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     var clicked = false;
     return BlocBuilder<RewardedAdCubit, RewardedAdState>(
       builder: (context, state) {
-        if (state is RewardedAdLoaded &&
-            context.read<UserDetailsCubit>().isDailyAdAvailable) {
+        if (state is RewardedAdLoaded && context.read<UserDetailsCubit>().isDailyAdAvailable) {
           return GestureDetector(
             onTap: () async {
               if (!clicked) {
-                await context
-                    .read<RewardedAdCubit>()
-                    .showDailyAd(context: context);
+                await context.read<RewardedAdCubit>().showDailyAd(context: context);
                 clicked = true;
               }
             },
@@ -1218,10 +1239,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                         style: TextStyle(
                           fontWeight: FontWeights.regular,
                           fontSize: 14,
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onTertiary
-                              .withValues(alpha: .6),
+                          color: Theme.of(context).colorScheme.onTertiary.withValues(alpha: .6),
                         ),
                       ),
                     ],
@@ -1255,12 +1273,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         children: [
           /// Contest Section Title
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 context.tr(contest) ?? contest,
                 style: _boldTextStyle,
               ),
-              const Spacer(),
               GestureDetector(
                 onTap: onTapViewAll,
                 child: Text(
@@ -1268,10 +1286,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onTertiary
-                        .withValues(alpha: 0.6),
+                    color: Theme.of(context).colorScheme.onTertiary.withValues(alpha: 0.6),
                   ),
                 ),
               ),
@@ -1415,8 +1430,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                 color: Colors.transparent,
                                 borderRadius: BorderRadius.circular(10),
                                 border: Border.all(
-                                  color:
-                                      Theme.of(context).scaffoldBackgroundColor,
+                                  color: Theme.of(context).scaffoldBackgroundColor,
                                 ),
                               ),
                               child: ClipRRect(
@@ -1455,6 +1469,32 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                 ],
                               ),
                             ),
+                            const Spacer(),
+                            GestureDetector(
+                              onTap: () {
+                                showPopover(
+                                  context: context,
+                                  bodyBuilder: (context) {
+                                    return CategoryInformationBubbleWidget(
+                                      title: 'Yarışma Kuralları',
+                                      description: 'Yarışma Kuralları Açıklama',
+                                    );
+                                  },
+                                  onPop: () => print('Popover was popped!'),
+                                  direction: PopoverDirection.bottom,
+                                  width: 300,
+                                  height: 200,
+                                );
+                              },
+                              child: Text(
+                                'Yarışma Kuralları',
+                                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                                      color: Theme.of(context).primaryColor,
+                                      decoration: TextDecoration.underline,
+                                      decorationColor: Theme.of(context).primaryColor,
+                                    ),
+                              ),
+                            ),
                           ],
                         ),
                         const SizedBox(height: 10),
@@ -1478,8 +1518,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                       ),
                                       const TextSpan(text: ' : '),
                                       TextSpan(
-                                        text:
-                                            "$entryFee ${context.tr("coinsLbl")!}",
+                                        text: "$entryFee ${context.tr("coinsLbl")!}",
                                         style: textStyle.copyWith(
                                           color: colorScheme.onTertiary,
                                         ),
@@ -1536,8 +1575,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                 ),
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(8),
-                                  color:
-                                      Theme.of(context).scaffoldBackgroundColor,
+                                  color: Theme.of(context).scaffoldBackgroundColor,
                                 ),
                                 child: Text(
                                   context.tr('playnowLbl')!,
@@ -1599,9 +1637,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               await quizZoneCubit.getQuizCategoryWithUserId(
                 languageId: _currLangId,
               );
-              await context
-                  .read<ContestCubit>()
-                  .getContest(languageId: _currLangId);
+              await context.read<ContestCubit>().getContest(languageId: _currLangId);
             }
             setState(() {});
           },
@@ -1615,8 +1651,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               ),
               BlocBuilder<QuizoneCategoryCubit, QuizoneCategoryState>(
                 builder: (context, state) {
-                  if (state is QuizoneCategoryFailure &&
-                      state.errorMessage == errorCodeDataNotFound) {
+                  if (state is QuizoneCategoryFailure && state.errorMessage == errorCodeDataNotFound) {
                     return const SizedBox.shrink();
                   }
 
@@ -1627,9 +1662,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   return const SizedBox.shrink();
                 },
               ),
-              if (_sysConfigCubit.isAdsEnable &&
-                  _sysConfigCubit.isDailyAdsEnabled &&
-                  !widget.isGuest) ...[
+              if (_sysConfigCubit.isAdsEnable && _sysConfigCubit.isDailyAdsEnabled && !widget.isGuest) ...[
                 _buildDailyAds(),
               ],
               if (_sysConfigCubit.isContestEnabled && !widget.isGuest) ...[
@@ -1675,8 +1708,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       context: context,
                       userId: state.userProfile.userId!,
                     );
-                    if (state.userProfile.profileUrl!.isEmpty ||
-                        state.userProfile.name!.isEmpty) {
+                    if (state.userProfile.profileUrl!.isEmpty || state.userProfile.name!.isEmpty) {
                       if (!profileComplete) {
                         profileComplete = true;
 
@@ -1694,16 +1726,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   }
                 },
                 builder: (context, state) {
-                  if (state is UserDetailsFetchInProgress ||
-                      state is UserDetailsInitial) {
+                  if (state is UserDetailsFetchInProgress || state is UserDetailsInitial) {
                     return const Center(child: CircularProgressContainer());
                   }
                   if (state is UserDetailsFetchFailure) {
                     return Center(
                       child: ErrorContainer(
                         showBackButton: true,
-                        errorMessage:
-                            convertErrorCodeToLanguageKey(state.errorMessage),
+                        errorMessage: convertErrorCodeToLanguageKey(state.errorMessage),
                         onTapRetry: fetchUserDetails,
                         showErrorImage: true,
                       ),
