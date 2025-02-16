@@ -1,9 +1,14 @@
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutterquiz/features/leaderBoard/leaderboard_exception.dart';
 import 'package:flutterquiz/features/profile_management/models/user_profile.dart';
 import 'package:flutterquiz/features/profile_management/profile_management_repository.dart';
+import 'package:flutterquiz/utils/api_utils.dart';
+import 'package:flutterquiz/utils/constants/constants.dart';
+import 'package:http/http.dart' as http;
 
 @immutable
 abstract class UserDetailsState {}
@@ -29,6 +34,8 @@ class UserDetailsCubit extends Cubit<UserDetailsState> {
       : super(UserDetailsInitial());
   final ProfileManagementRepository _profileManagementRepository;
 
+  String rankM = '0';
+
   //to fetch user details form remote
   Future<void> fetchUserDetails() async {
     emit(UserDetailsFetchInProgress());
@@ -36,6 +43,7 @@ class UserDetailsCubit extends Cubit<UserDetailsState> {
     try {
       final userProfile =
           await _profileManagementRepository.getUserDetailsById();
+      await _fetchData(limit: '20');
       emit(UserDetailsFetchSuccess(userProfile));
     } on Exception catch (e) {
       emit(UserDetailsFetchFailure(e.toString()));
@@ -157,4 +165,51 @@ class UserDetailsCubit extends Cubit<UserDetailsState> {
   bool removeAds() => state is UserDetailsFetchSuccess
       ? (state as UserDetailsFetchSuccess).userProfile.adsRemovedForUser == '1'
       : false;
+
+  Future<({int total, List<Map<String, dynamic>> otherUsersRanks})> _fetchData({
+    required String limit,
+    String? offset,
+  }) async {
+    try {
+      final body = <String, String>{
+        limitKey: limit,
+        offsetKey: offset ?? '',
+      };
+      if (offset == null) {
+        body.remove(offset);
+      }
+      final response = await http.post(
+        Uri.parse(getMonthlyLeaderboardUrl),
+        body: body,
+        headers: await ApiUtils.getHeaders(),
+      );
+
+      final responseJson = jsonDecode(response.body) as Map<String, dynamic>;
+
+      if (responseJson['error'] as bool) {
+        throw LeaderBoardException(
+          errorMessageCode: responseJson['message'].toString(),
+        );
+      }
+
+      final total = int.parse(responseJson['total'] as String? ?? '0');
+      final data = responseJson['data'] as Map<String, dynamic>;
+
+      if (total != 0) {
+        final myRank = data['my_rank'] as Map<String, dynamic>;
+
+        rankM = myRank[userRankKey].toString();
+      } else {
+        rankM = '';
+      }
+
+      return (
+        total: total,
+        otherUsersRanks:
+            (data['other_users_rank'] as List).cast<Map<String, dynamic>>(),
+      );
+    } catch (e) {
+      throw LeaderBoardException(errorMessageCode: e.toString());
+    }
+  }
 }

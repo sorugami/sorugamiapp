@@ -564,8 +564,17 @@ class _ResultScreenState extends State<ResultScreen> {
                   : widget.questions!.first.subcategoryId!,
               typeId: '',
             );
+      } else if (widget.quizType == QuizTypes.trueAndFalse && widget.isPlayed) {
+        _updateCoinsAndScore();
+        context.read<SetCategoryPlayed>().setCategoryPlayed(
+              quizType: QuizTypes.trueAndFalse,
+              categoryId: widget.questions!.first.categoryId!,
+              subcategoryId: '',
+              typeId: '',
+            );
       }
     }
+
     // fetchUpdateUserDetails();
   }
 

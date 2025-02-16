@@ -126,6 +126,7 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
     required List<Map<String, String?>> values,
     required String keyValue,
   }) {
+    values.removeWhere((element) => element['name'] != 'Savaş Soruları');
     selectedCategory = values.map((e) => e['name']).toList().first!;
     selectedCategoryId = values.map((e) => e['id']).toList().first!;
     selectedCategoryImage = values.map((e) => e['image']).toList().first!;

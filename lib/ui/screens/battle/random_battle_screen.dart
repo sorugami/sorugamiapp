@@ -81,6 +81,9 @@ class _RandomBattleScreenState extends State<RandomBattleScreen> {
     required List<Map<String, String?>> values,
     required String keyValue,
   }) {
+    if (values.first['name'] != 'selectCategory') {
+      values.removeWhere((element) => element['name'] != 'Savaş Soruları');
+    }
     selectedCategory = values.map((e) => e['name']).toList().first!;
     selectedCategoryId = values.map((e) => e['id']).toList().first!;
 

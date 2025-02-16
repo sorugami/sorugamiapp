@@ -91,9 +91,9 @@ class LeaderBoardDailyCubit extends Cubit<LeaderBoardDailyState> {
     }
   }
 
-  void fetchLeaderBoard(String limit) {
+  Future<void> fetchLeaderBoard(String limit) async {
     emit(LeaderBoardDailyProgress());
-    _fetchData(limit: limit).then((v) {
+    await _fetchData(limit: limit).then((v) {
       emit(
         LeaderBoardDailySuccess(
           v.otherUsersRanks,

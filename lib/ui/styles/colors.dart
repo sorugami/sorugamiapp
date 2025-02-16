@@ -11,7 +11,7 @@ const klPrimaryTextColor = Color(0xff45536d);
 const kdBackgroundColor = Color(0xff294261);
 const kdCanvasColor = Color(0xccffffff);
 const kdPageBackgroundColor = Color(0xff233354);
-const kdPrimaryColor = Color(0xfff279a2);
+const kdPrimaryColor = Color(0xffeb5138);
 const kdPrimaryTextColor = Color(0xfffefefe);
 
 /// Common
