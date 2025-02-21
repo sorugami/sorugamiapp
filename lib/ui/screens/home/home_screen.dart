@@ -59,8 +59,7 @@ class HomeScreen extends StatefulWidget {
             create: (_) => ReferAndEarnCubit(AuthRepository()),
           ),
           BlocProvider<UpdateScoreAndCoinsCubit>(
-            create: (_) =>
-                UpdateScoreAndCoinsCubit(ProfileManagementRepository()),
+            create: (_) => UpdateScoreAndCoinsCubit(ProfileManagementRepository()),
           ),
           BlocProvider<UpdateUserDetailCubit>(
             create: (_) => UpdateUserDetailCubit(ProfileManagementRepository()),
@@ -75,13 +74,7 @@ class HomeScreen extends StatefulWidget {
   }
 }
 
-typedef ZoneType = ({
-  String title,
-  String img,
-  String desc,
-  String informationTitle,
-  String informationDescription
-});
+typedef ZoneType = ({String title, String img, String desc, String informationTitle, String informationDescription});
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   /// Quiz Zone globals
@@ -191,8 +184,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   ///
   late String _currLangId;
   late final SystemConfigCubit _sysConfigCubit;
-  final _quizZoneId =
-      UiUtils.getCategoryTypeNumberFromQuizType(QuizTypes.quizZone);
+  final _quizZoneId = UiUtils.getCategoryTypeNumberFromQuizType(QuizTypes.quizZone);
 
   @override
   void initState() {
@@ -244,8 +236,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   Future<void> _initLocalNotification() async {
-    const initializationSettingsAndroid =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+    const initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
     const initializationSettingsIOS = DarwinInitializationSettings();
 
     const initializationSettings = InitializationSettings(
@@ -260,8 +251,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     /// Request Permissions for IOS
     if (Platform.isIOS) {
       await flutterLocalNotificationsPlugin
-          .resolvePlatformSpecificImplementation<
-              IOSFlutterLocalNotificationsPlugin>()
+          .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>()
           ?.requestPermissions();
     }
   }
@@ -304,8 +294,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         battleZones.removeWhere((e) => e.title == 'groupPlay');
       }
 
-      if (!_sysConfigCubit.isOneVsOneBattleEnabled &&
-          !_sysConfigCubit.isRandomBattleEnabled) {
+      if (!_sysConfigCubit.isOneVsOneBattleEnabled && !_sysConfigCubit.isRandomBattleEnabled) {
         battleZones.removeWhere((e) => e.title == 'battleQuiz');
       }
       setState(() {});
@@ -318,8 +307,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     await Future<void>.delayed(Duration.zero);
     if (_sysConfigCubit.isForceUpdateEnable) {
       try {
-        final forceUpdate =
-            await UiUtils.forceUpdate(_sysConfigCubit.appVersion);
+        final forceUpdate = await UiUtils.forceUpdate(_sysConfigCubit.appVersion);
 
         if (forceUpdate) {
           setState(() => showUpdateContainer = true);
@@ -397,8 +385,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         await Navigator.of(context).pushNamed(
           Routes.category,
           arguments: {
-            'quizType':
-                _getQuizTypeFromCategory(message.data['type'] as String),
+            'quizType': _getQuizTypeFromCategory(message.data['type'] as String),
           },
         );
       } else if (message.data['type'] == 'badges') {
@@ -620,15 +607,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     context.read<QuizCategoryCubit>().updateState(QuizCategoryInitial());
     if (index == 'groupPlay') {
-      context
-          .read<MultiUserBattleRoomCubit>()
-          .updateState(MultiUserBattleRoomInitial());
+      context.read<MultiUserBattleRoomCubit>().updateState(MultiUserBattleRoomInitial());
 
       Navigator.of(context).push(
         CupertinoPageRoute<void>(
           builder: (_) => BlocProvider<UpdateScoreAndCoinsCubit>(
-            create: (context) =>
-                UpdateScoreAndCoinsCubit(ProfileManagementRepository()),
+            create: (context) => UpdateScoreAndCoinsCubit(ProfileManagementRepository()),
             child: CreateOrJoinRoomScreen(
               quizType: QuizTypes.groupPlay,
               title: context.tr('groupPlay')!,
@@ -648,8 +632,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         Navigator.of(context).push(
           CupertinoPageRoute<CreateOrJoinRoomScreen>(
             builder: (_) => BlocProvider<UpdateScoreAndCoinsCubit>(
-              create: (_) =>
-                  UpdateScoreAndCoinsCubit(ProfileManagementRepository()),
+              create: (_) => UpdateScoreAndCoinsCubit(ProfileManagementRepository()),
               child: CreateOrJoinRoomScreen(
                 quizType: QuizTypes.oneVsOneBattle,
                 title: context.tr('playWithFrdLbl')!,
@@ -699,10 +682,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onTertiary
-                            .withValues(alpha: 0.3),
+                        color: Theme.of(context).colorScheme.onTertiary.withValues(alpha: 0.3),
                       ),
                     ),
                     child: QImage.circular(imageUrl: _userProfileImg),
@@ -865,9 +845,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
-                            !isCateListExpanded
-                                ? Icons.keyboard_arrow_down_rounded
-                                : Icons.keyboard_arrow_up_rounded,
+                            !isCateListExpanded ? Icons.keyboard_arrow_down_rounded : Icons.keyboard_arrow_up_rounded,
                             color: Theme.of(context).primaryColor,
                             size: 32,
                           ),
@@ -936,8 +914,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           }
 
           if (!isCateListExpanded) {
-            categoriesToShowCount =
-                categories.length <= minCount ? categories.length : minCount;
+            categoriesToShowCount = categories.length <= minCount ? categories.length : minCount;
           } else {
             categoriesToShowCount = categories.length;
           }
@@ -1097,10 +1074,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                           : "${context.tr('subCategoriesLbl')}: ${category.noOf}",
                       style: TextStyle(
                         fontSize: 14,
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onTertiary
-                            .withValues(alpha: 0.6),
+                        color: Theme.of(context).colorScheme.onTertiary.withValues(alpha: 0.6),
                       ),
                     ),
                   );
@@ -1149,10 +1123,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       onTap: () => _onPressedBattle(battleZones[i].title),
                       title: context.tr(battleZones[i].title)!,
                       desc: context.tr(battleZones[i].desc)!,
-                      informationTitle:
-                          context.tr(battleZones[i].informationTitle)!,
-                      informationDescription:
-                          context.tr(battleZones[i].informationDescription)!,
+                      informationTitle: context.tr(battleZones[i].informationTitle)!,
+                      informationDescription: context.tr(battleZones[i].informationDescription)!,
                       img: battleZones[i].img,
                     ),
                   ),
@@ -1192,10 +1164,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       onTap: () => _onPressedSelfExam(examZones[i].title),
                       title: context.tr(examZones[i].title)!,
                       desc: context.tr(examZones[i].desc)!,
-                      informationTitle:
-                          context.tr(examZones[i].informationTitle)!,
-                      informationDescription:
-                          context.tr(examZones[i].informationDescription)!,
+                      informationTitle: context.tr(examZones[i].informationTitle)!,
+                      informationDescription: context.tr(examZones[i].informationDescription)!,
                       img: examZones[i].img,
                     ),
                   ),
@@ -1239,10 +1209,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 onTap: () => _onPressedZone(playDifferentZones[i].title),
                 title: context.tr(playDifferentZones[i].title)!,
                 desc: context.tr(playDifferentZones[i].desc)!,
-                informationTitle:
-                    context.tr(playDifferentZones[i].informationTitle)!,
-                informationDescription:
-                    context.tr(playDifferentZones[i].informationDescription)!,
+                informationTitle: context.tr(playDifferentZones[i].informationTitle)!,
+                informationDescription: context.tr(playDifferentZones[i].informationDescription)!,
                 img: playDifferentZones[i].img,
               ),
             ),
@@ -1256,14 +1224,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     var clicked = false;
     return BlocBuilder<RewardedAdCubit, RewardedAdState>(
       builder: (context, state) {
-        if (state is RewardedAdLoaded &&
-            context.read<UserDetailsCubit>().isDailyAdAvailable) {
+        if (state is RewardedAdLoaded && context.read<UserDetailsCubit>().isDailyAdAvailable) {
           return GestureDetector(
             onTap: () async {
               if (!clicked) {
-                await context
-                    .read<RewardedAdCubit>()
-                    .showDailyAd(context: context);
+                await context.read<RewardedAdCubit>().showDailyAd(context: context);
                 clicked = true;
               }
             },
@@ -1318,10 +1283,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                         style: TextStyle(
                           fontWeight: FontWeights.regular,
                           fontSize: 14,
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onTertiary
-                              .withValues(alpha: .6),
+                          color: Theme.of(context).colorScheme.onTertiary.withValues(alpha: .6),
                         ),
                       ),
                     ],
@@ -1505,8 +1467,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                 color: Colors.transparent,
                                 borderRadius: BorderRadius.circular(10),
                                 border: Border.all(
-                                  color:
-                                      Theme.of(context).scaffoldBackgroundColor,
+                                  color: Theme.of(context).scaffoldBackgroundColor,
                                 ),
                               ),
                               child: ClipRRect(
@@ -1564,14 +1525,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                               },
                               child: Text(
                                 'Yarışma Kuralları',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelMedium
-                                    ?.copyWith(
+                                style: Theme.of(context).textTheme.labelMedium?.copyWith(
                                       color: Theme.of(context).primaryColor,
                                       decoration: TextDecoration.underline,
-                                      decorationColor:
-                                          Theme.of(context).primaryColor,
+                                      decorationColor: Theme.of(context).primaryColor,
                                     ),
                               ),
                             ),
@@ -1598,8 +1555,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                       ),
                                       const TextSpan(text: ' : '),
                                       TextSpan(
-                                        text:
-                                            "$entryFee ${context.tr("coinsLbl")!}",
+                                        text: "$entryFee ${context.tr("coinsLbl")!}",
                                         style: textStyle.copyWith(
                                           color: colorScheme.onTertiary,
                                         ),
@@ -1656,8 +1612,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                 ),
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(8),
-                                  color:
-                                      Theme.of(context).scaffoldBackgroundColor,
+                                  color: Theme.of(context).scaffoldBackgroundColor,
                                 ),
                                 child: Text(
                                   context.tr('playnowLbl')!,
@@ -1719,9 +1674,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               await quizZoneCubit.getQuizCategoryWithUserId(
                 languageId: _currLangId,
               );
-              await context
-                  .read<ContestCubit>()
-                  .getContest(languageId: _currLangId);
+              await context.read<ContestCubit>().getContest(languageId: _currLangId);
             }
             setState(() {});
           },
@@ -1731,12 +1684,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               UserAchievements(
                 userRank: _userRank.isEmpty ? '0' : _userRank,
                 userCoins: _userCoins,
-                userScore: _userScore,
+                userScore: _userScore.isEmpty ? '0' : _userScore,
               ),
               BlocBuilder<QuizoneCategoryCubit, QuizoneCategoryState>(
                 builder: (context, state) {
-                  if (state is QuizoneCategoryFailure &&
-                      state.errorMessage == errorCodeDataNotFound) {
+                  if (state is QuizoneCategoryFailure && state.errorMessage == errorCodeDataNotFound) {
                     return const SizedBox.shrink();
                   }
 
@@ -1747,9 +1699,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   return const SizedBox.shrink();
                 },
               ),
-              if (_sysConfigCubit.isAdsEnable &&
-                  _sysConfigCubit.isDailyAdsEnabled &&
-                  !widget.isGuest) ...[
+              if (_sysConfigCubit.isAdsEnable && _sysConfigCubit.isDailyAdsEnabled && !widget.isGuest) ...[
                 _buildDailyAds(),
               ],
               if (_sysConfigCubit.isContestEnabled && !widget.isGuest) ...[
@@ -1796,8 +1746,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       context: context,
                       userId: state.userProfile.userId!,
                     );
-                    if (state.userProfile.profileUrl!.isEmpty ||
-                        state.userProfile.name!.isEmpty) {
+                    if (state.userProfile.profileUrl!.isEmpty || state.userProfile.name!.isEmpty) {
                       if (!profileComplete) {
                         profileComplete = true;
 
@@ -1815,16 +1764,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   }
                 },
                 builder: (context, state) {
-                  if (state is UserDetailsFetchInProgress ||
-                      state is UserDetailsInitial) {
+                  if (state is UserDetailsFetchInProgress || state is UserDetailsInitial) {
                     return const Center(child: CircularProgressContainer());
                   }
                   if (state is UserDetailsFetchFailure) {
                     return Center(
                       child: ErrorContainer(
                         showBackButton: true,
-                        errorMessage:
-                            convertErrorCodeToLanguageKey(state.errorMessage),
+                        errorMessage: convertErrorCodeToLanguageKey(state.errorMessage),
                         onTapRetry: fetchUserDetails,
                         showErrorImage: true,
                       ),
@@ -1837,7 +1784,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   _userProfileImg = user.profileUrl!;
                   _userRank = LeaderBoardDailyCubit.rankD;
                   _userCoins = user.coins!;
-                  _userScore = user.allTimeScore!;
+                  _userScore = LeaderBoardDailyCubit.scoreD;
 
                   return _buildHome();
                 },
