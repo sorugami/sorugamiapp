@@ -1685,6 +1685,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 userRank: _userRank.isEmpty ? '0' : _userRank,
                 userCoins: _userCoins,
                 userScore: _userScore.isEmpty ? '0' : _userScore,
+                isGuest: widget.isGuest,
               ),
               BlocBuilder<QuizoneCategoryCubit, QuizoneCategoryState>(
                 builder: (context, state) {

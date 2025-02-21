@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutterquiz/app/routes.dart';
 import 'package:flutterquiz/utils/constants/fonts.dart';
 import 'package:flutterquiz/utils/extensions.dart';
 import 'package:flutterquiz/utils/ui_utils.dart';
@@ -6,6 +7,7 @@ import 'package:intl/intl.dart';
 
 class UserAchievements extends StatelessWidget {
   const UserAchievements({
+    required this.isGuest,
     super.key,
     this.userRank = '0',
     this.userCoins = '0',
@@ -15,6 +17,7 @@ class UserAchievements extends StatelessWidget {
   final String userRank;
   final String userCoins;
   final String userScore;
+  final bool isGuest;
 
   static const _verticalDivider = VerticalDivider(
     color: Color(0x99FFFFFF),
@@ -28,6 +31,14 @@ class UserAchievements extends StatelessWidget {
     final rank = context.tr('rankLbl')!;
     final coins = context.tr('coinsLbl')!;
     final score = context.tr('scoreLbl')!;
+
+    void onTapCoins() => Navigator.of(context).pushNamed(
+          isGuest ? Routes.login : Routes.coinHistory,
+        );
+
+    void onTapLeaderboard() => Navigator.of(context).pushNamed(
+          isGuest ? Routes.login : Routes.leaderBoard,
+        );
 
     return LayoutBuilder(
       builder: (_, constraints) {
@@ -48,8 +59,7 @@ class UserAchievements extends StatelessWidget {
                       offset: const Offset(0, 25),
                       blurRadius: 30,
                       spreadRadius: 3,
-                      color:
-                          Theme.of(context).primaryColor.withValues(alpha: 0.5),
+                      color: Theme.of(context).primaryColor.withValues(alpha: 0.5),
                     ),
                   ],
                   borderRadius: BorderRadius.vertical(
@@ -77,19 +87,28 @@ class UserAchievements extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _Achievement(
-                    title: rank,
-                    value: numberFormat.format(double.parse(userRank)),
+                  GestureDetector(
+                    onTap: onTapLeaderboard,
+                    child: _Achievement(
+                      title: rank,
+                      value: numberFormat.format(double.parse(userRank)),
+                    ),
                   ),
                   _verticalDivider,
-                  _Achievement(
-                    title: coins,
-                    value: numberFormat.format(double.parse(userCoins)),
+                  GestureDetector(
+                    onTap: onTapCoins,
+                    child: _Achievement(
+                      title: coins,
+                      value: numberFormat.format(double.parse(userCoins)),
+                    ),
                   ),
                   _verticalDivider,
-                  _Achievement(
-                    title: score,
-                    value: numberFormat.format(double.parse(userScore)),
+                  GestureDetector(
+                    onTap: onTapCoins,
+                    child: _Achievement(
+                      title: score,
+                      value: numberFormat.format(double.parse(userScore)),
+                    ),
                   ),
                 ],
               ),
