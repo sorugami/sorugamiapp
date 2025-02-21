@@ -36,8 +36,7 @@ class CreateOrEditProfileScreen extends StatefulWidget {
   final bool isNewUser;
 
   @override
-  State<CreateOrEditProfileScreen> createState() =>
-      _SelectProfilePictureScreen();
+  State<CreateOrEditProfileScreen> createState() => _SelectProfilePictureScreen();
 
   static Route<dynamic> route(RouteSettings routeSettings) {
     return CupertinoPageRoute(
@@ -83,9 +82,7 @@ class _SelectProfilePictureScreen extends State<CreateOrEditProfileScreen> {
       if (authType == 'mobile') {
         isEmailTextFieldEnabled = true;
         isPhoneTextFieldEnabled = false;
-      } else if (authType == 'gmail' ||
-          authType == 'email' ||
-          authType == 'apple') {
+      } else if (authType == 'gmail' || authType == 'email' || authType == 'apple') {
         isEmailTextFieldEnabled = false;
         isPhoneTextFieldEnabled = true;
       }
@@ -97,8 +94,7 @@ class _SelectProfilePictureScreen extends State<CreateOrEditProfileScreen> {
     final byteData = await rootBundle.load(Assets.profile(imageName));
     final file = File('${(await getTemporaryDirectory()).path}/temp.png');
     await file.writeAsBytes(
-      byteData.buffer
-          .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes),
+      byteData.buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes),
     );
     await context.read<UploadProfileCubit>().uploadProfilePicture(file);
   }
@@ -313,10 +309,7 @@ class _SelectProfilePictureScreen extends State<CreateOrEditProfileScreen> {
                           padding: const EdgeInsets.all(5),
                           decoration: BoxDecoration(
                             border: Border.all(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onTertiary
-                                  .withValues(alpha: 0.2),
+                              color: Theme.of(context).colorScheme.onTertiary.withValues(alpha: 0.2),
                             ),
                             borderRadius: BorderRadius.circular(30),
                           ),
@@ -351,10 +344,7 @@ class _SelectProfilePictureScreen extends State<CreateOrEditProfileScreen> {
                           padding: const EdgeInsets.all(5),
                           decoration: BoxDecoration(
                             border: Border.all(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onTertiary
-                                  .withValues(alpha: 0.2),
+                              color: Theme.of(context).colorScheme.onTertiary.withValues(alpha: 0.2),
                             ),
                             borderRadius: BorderRadius.circular(30),
                           ),
@@ -427,8 +417,7 @@ class _SelectProfilePictureScreen extends State<CreateOrEditProfileScreen> {
 
   Widget _buildDefaultAvtarImages() {
     final defaultProfileImages =
-        (context.read<SystemConfigCubit>().state as SystemConfigFetchSuccess)
-            .defaultProfileImages;
+        (context.read<SystemConfigCubit>().state as SystemConfigFetchSuccess).defaultProfileImages;
 
     if (widget.isNewUser) {
       return SizedBox(
@@ -515,18 +504,15 @@ class _SelectProfilePictureScreen extends State<CreateOrEditProfileScreen> {
           builder: (context, referState) {
             return BlocConsumer<UpdateUserDetailCubit, UpdateUserDetailState>(
               listener: (_, state) {
-                if (state is UpdateUserDetailSuccess ||
-                    state is UpdateUserDetailFailure) {
+                if (state is UpdateUserDetailSuccess || state is UpdateUserDetailFailure) {
                   context.shouldPop();
                 }
               },
               builder: (updateContext, updateState) {
-                final textButtonKey =
-                    updateState is UpdateUserDetailInProgress ||
-                            context.read<UploadProfileCubit>().state
-                                is UploadProfileInProgress
-                        ? 'uploadingBtn'
-                        : 'continueLbl';
+                final textButtonKey = updateState is UpdateUserDetailInProgress ||
+                        context.read<UploadProfileCubit>().state is UploadProfileInProgress
+                    ? 'uploadingBtn'
+                    : 'continueLbl';
                 return TextButton(
                   style: TextButton.styleFrom(
                     backgroundColor: Theme.of(context).primaryColor,
@@ -544,8 +530,7 @@ class _SelectProfilePictureScreen extends State<CreateOrEditProfileScreen> {
                       return;
                     }
 
-                    if (context.read<UpdateUserDetailCubit>().state
-                        is UpdateUserDetailInProgress) {
+                    if (context.read<UpdateUserDetailCubit>().state is UpdateUserDetailInProgress) {
                       return;
                     }
 
@@ -555,9 +540,7 @@ class _SelectProfilePictureScreen extends State<CreateOrEditProfileScreen> {
                     }
 
                     //if profile is empty
-                    if (selectedAvatar == null &&
-                        selectedImage == null &&
-                        userProfile.profileUrl!.isEmpty) {
+                    if (selectedAvatar == null && selectedImage == null && userProfile.profileUrl!.isEmpty) {
                       UiUtils.showSnackBar(
                         context.tr('selectProfileLbl')!,
                         context,
@@ -576,9 +559,7 @@ class _SelectProfilePictureScreen extends State<CreateOrEditProfileScreen> {
                     if (selectedAvatar != null) {
                       await uploadProfileImage(selectedAvatar ?? '');
                     } else if (selectedImage != null) {
-                      await context
-                          .read<UploadProfileCubit>()
-                          .uploadProfilePicture(selectedImage);
+                      await context.read<UploadProfileCubit>().uploadProfilePicture(selectedImage);
                     }
 
                     if (widget.isNewUser) {
@@ -586,25 +567,20 @@ class _SelectProfilePictureScreen extends State<CreateOrEditProfileScreen> {
                         context.read<ReferAndEarnCubit>().getReward(
                               name: nameController!.text.trim(),
                               userProfile: userProfile,
-                              friendReferralCode:
-                                  inviteTextEditingController.text.trim(),
-                              authType:
-                                  context.read<AuthCubit>().getAuthProvider(),
+                              friendReferralCode: inviteTextEditingController.text.trim(),
+                              authType: context.read<AuthCubit>().getAuthProvider(),
                             );
                       }
 
                       /// ----
-                      if (emailController!.text.isNotEmpty ||
-                          phoneController!.text.isNotEmpty) {
+                      if (emailController!.text.isNotEmpty || phoneController!.text.isNotEmpty) {
                         context.read<UserDetailsCubit>().updateUserProfile(
                               email: emailController!.text.trim(),
                               name: nameController!.text.trim(),
                               mobile: phoneController!.text.trim(),
                             );
 
-                        await context
-                            .read<UpdateUserDetailCubit>()
-                            .updateProfile(
+                        await context.read<UpdateUserDetailCubit>().updateProfile(
                               email: emailController!.text,
                               name: nameController!.text,
                               mobile: phoneController!.text,
@@ -667,7 +643,7 @@ class _SelectProfilePictureScreen extends State<CreateOrEditProfileScreen> {
         Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
-            color: colorScheme.surface,
+            color: colorScheme.onTertiary.withValues(alpha: 0.2),
           ),
           width: context.width,
           height: 50,
@@ -675,6 +651,7 @@ class _SelectProfilePictureScreen extends State<CreateOrEditProfileScreen> {
             validator: (_) => null,
             cursorColor: colorScheme.onTertiary,
             controller: nameController,
+            readOnly: true,
             style: TextStyle(
               color: colorScheme.onTertiary,
               fontWeight: FontWeight.bold,
@@ -712,9 +689,7 @@ class _SelectProfilePictureScreen extends State<CreateOrEditProfileScreen> {
         Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
-            color: isEmailTextFieldEnabled
-                ? colorScheme.surface
-                : colorScheme.onTertiary.withValues(alpha: 0.2),
+            color: isEmailTextFieldEnabled ? colorScheme.surface : colorScheme.onTertiary.withValues(alpha: 0.2),
           ),
           width: context.width,
           height: 50,
@@ -771,9 +746,7 @@ class _SelectProfilePictureScreen extends State<CreateOrEditProfileScreen> {
         Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
-            color: isPhoneTextFieldEnabled
-                ? colorScheme.surface
-                : colorScheme.onTertiary.withValues(alpha: 0.2),
+            color: isPhoneTextFieldEnabled ? colorScheme.surface : colorScheme.onTertiary.withValues(alpha: 0.2),
           ),
           width: context.width,
           height: 50,
@@ -789,9 +762,7 @@ class _SelectProfilePictureScreen extends State<CreateOrEditProfileScreen> {
             ],
             keyboardType: TextInputType.phone,
             style: TextStyle(
-              color: isPhoneTextFieldEnabled
-                  ? colorScheme.onTertiary
-                  : colorScheme.onTertiary.withValues(alpha: 0.4),
+              color: isPhoneTextFieldEnabled ? colorScheme.onTertiary : colorScheme.onTertiary.withValues(alpha: 0.4),
               fontWeight: FontWeight.bold,
               fontSize: 18,
             ),
@@ -839,12 +810,9 @@ class _SelectProfilePictureScreen extends State<CreateOrEditProfileScreen> {
                 Transform.scale(
                   scale: 0.8,
                   child: CupertinoSwitch(
-                    thumbColor: iHaveInviteCode
-                        ? Theme.of(context).primaryColor
-                        : const Color(0xFF5c5c5c),
+                    thumbColor: iHaveInviteCode ? Theme.of(context).primaryColor : const Color(0xFF5c5c5c),
                     activeTrackColor: Theme.of(context).scaffoldBackgroundColor,
-                    inactiveTrackColor:
-                        Theme.of(context).scaffoldBackgroundColor,
+                    inactiveTrackColor: Theme.of(context).scaffoldBackgroundColor,
                     value: iHaveInviteCode,
                     onChanged: (v) => setState(() => iHaveInviteCode = v),
                   ),
@@ -890,9 +858,7 @@ class _SelectProfilePictureScreen extends State<CreateOrEditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final appBar = !widget.isNewUser
-        ? QAppBar(title: Text(context.tr('editProfile')!))
-        : null;
+    final appBar = !widget.isNewUser ? QAppBar(title: Text(context.tr('editProfile')!)) : null;
 
     return PopScope(
       canPop: !widget.isNewUser,
@@ -912,15 +878,13 @@ class _SelectProfilePictureScreen extends State<CreateOrEditProfileScreen> {
               },
               bloc: context.read<UserDetailsCubit>(),
               builder: (context, state) {
-                if (state is UserDetailsFetchInProgress ||
-                    state is UserDetailsInitial) {
+                if (state is UserDetailsFetchInProgress || state is UserDetailsInitial) {
                   return const Center(child: CircularProgressContainer());
                 }
                 if (state is UserDetailsFetchFailure) {
                   return ErrorContainer(
                     showBackButton: true,
-                    errorMessage:
-                        convertErrorCodeToLanguageKey(state.errorMessage),
+                    errorMessage: convertErrorCodeToLanguageKey(state.errorMessage),
                     onTapRetry: () {
                       context.read<UserDetailsCubit>().fetchUserDetails();
                     },
@@ -928,15 +892,11 @@ class _SelectProfilePictureScreen extends State<CreateOrEditProfileScreen> {
                   );
                 }
 
-                final userProfile =
-                    (state as UserDetailsFetchSuccess).userProfile;
+                final userProfile = (state as UserDetailsFetchSuccess).userProfile;
 
-                nameController ??=
-                    TextEditingController(text: userProfile.name);
-                emailController ??=
-                    TextEditingController(text: userProfile.email);
-                phoneController ??=
-                    TextEditingController(text: userProfile.mobileNumber);
+                nameController ??= TextEditingController(text: userProfile.name);
+                emailController ??= TextEditingController(text: userProfile.email);
+                phoneController ??= TextEditingController(text: userProfile.mobileNumber);
 
                 final size = context;
 
