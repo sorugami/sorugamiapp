@@ -22,6 +22,7 @@ import 'package:flutterquiz/features/leaderboard/cubit/leaderboard_daily_cubit.d
 import 'package:flutterquiz/features/profile_management/cubits/update_score_and_coins_cubit.dart';
 import 'package:flutterquiz/features/profile_management/cubits/update_user_details_cubit.dart';
 import 'package:flutterquiz/features/profile_management/cubits/user_details_cubit.dart';
+import 'package:flutterquiz/features/profile_management/models/information_model.dart';
 import 'package:flutterquiz/features/profile_management/profile_management_local_data_source.dart';
 import 'package:flutterquiz/features/profile_management/profile_management_repository.dart';
 import 'package:flutterquiz/features/quiz/cubits/contest_cubit.dart';
@@ -74,7 +75,21 @@ class HomeScreen extends StatefulWidget {
   }
 }
 
-typedef ZoneType = ({String title, String img, String desc, String informationTitle, String informationDescription});
+class ZoneType {
+  ZoneType({
+    required this.title,
+    required this.img,
+    required this.desc,
+    this.informationTitle,
+    this.informationDescription,
+  });
+
+  String title;
+  String img;
+  String desc;
+  String? informationTitle;
+  String? informationDescription;
+}
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   /// Quiz Zone globals
@@ -87,83 +102,23 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
-  final battleZones = <ZoneType>[
-    (
-      title: 'groupPlay',
-      img: Assets.groupBattleIcon,
-      desc: 'desGroupPlay',
-      informationDescription: 'Gurup Savaşı Açıklaması',
-      informationTitle: 'Gurup Savaşı',
-    ),
-    (
-      title: 'battleQuiz',
-      img: Assets.oneVsOneIcon,
-      desc: 'desBattleQuiz',
-      informationDescription: '1 v\\s 1 Savaş Açıklama',
-      informationTitle: '1 v\\s 1 Savaş ',
-    ),
+  List<ZoneType> battleZones = <ZoneType>[
+    ZoneType(title: 'groupPlay', img: Assets.groupBattleIcon, desc: 'desGroupPlay'),
+    ZoneType(title: 'battleQuiz', img: Assets.oneVsOneIcon, desc: 'desBattleQuiz'),
   ];
 
-  final examZones = <ZoneType>[
-    (
-      title: 'exam',
-      img: Assets.examQuizIcon,
-      desc: 'desExam',
-      informationDescription: 'Sınav açıklaması',
-      informationTitle: 'Sınav',
-    ),
-    (
-      title: 'selfChallenge',
-      img: Assets.selfChallengeIcon,
-      desc: 'challengeYourselfLbl',
-      informationDescription: 'Kendini Test Et açıklaması',
-      informationTitle: 'Kendini Test Et',
-    ),
+  List<ZoneType> examZones = <ZoneType>[
+    ZoneType(title: 'exam', img: Assets.examQuizIcon, desc: 'desExam'),
+    ZoneType(title: 'selfChallenge', img: Assets.selfChallengeIcon, desc: 'challengeYourselfLbl'),
   ];
 
-  final playDifferentZones = <ZoneType>[
-    (
-      title: 'dailyQuiz',
-      img: Assets.dailyQuizIcon,
-      desc: 'desDailyQuiz',
-      informationDescription: 'Günlük Sınav açıklaması',
-      informationTitle: 'Günlük Sınav'
-    ),
-    (
-      title: 'funAndLearn',
-      img: Assets.funNLearnIcon,
-      desc: 'desFunAndLearn',
-      informationDescription: 'Dikkatini Görelim açıklaması',
-      informationTitle: 'Dikkatini Görelim'
-    ),
-    (
-      title: 'guessTheWord',
-      img: Assets.guessTheWordIcon,
-      desc: 'desGuessTheWord',
-      informationDescription: 'Kelime Oyunu Açıklaması',
-      informationTitle: 'Kelime Oyunu'
-    ),
-    (
-      title: 'audioQuestions',
-      img: Assets.audioQuizIcon,
-      desc: 'desAudioQuestions',
-      informationDescription: 'Sesli Sorular açıklaması',
-      informationTitle: 'Sesli Sorular açıklaması'
-    ),
-    (
-      title: 'mathMania',
-      img: Assets.mathsQuizIcon,
-      desc: 'desMathMania',
-      informationDescription: 'Özel Sınavlar açıklaması',
-      informationTitle: 'Özel Sınavlar'
-    ),
-    (
-      title: 'truefalse',
-      img: Assets.trueFalseQuizIcon,
-      desc: 'desTrueFalse',
-      informationDescription: 'Doğru Yanlış açıklaması',
-      informationTitle: 'Doğru\'Yanlış'
-    ),
+  List<ZoneType> playDifferentZones = <ZoneType>[
+    ZoneType(title: 'dailyQuiz', img: Assets.dailyQuizIcon, desc: 'desDailyQuiz'),
+    ZoneType(title: 'funAndLearn', img: Assets.funNLearnIcon, desc: 'desFunAndLearn'),
+    ZoneType(title: 'guessTheWord', img: Assets.guessTheWordIcon, desc: 'desGuessTheWord'),
+    ZoneType(title: 'audioQuestions', img: Assets.audioQuizIcon, desc: 'desAudioQuestions'),
+    ZoneType(title: 'mathMania', img: Assets.mathsQuizIcon, desc: 'desMathMania'),
+    ZoneType(title: 'truefalse', img: Assets.trueFalseQuizIcon, desc: 'desTrueFalse'),
   ];
 
   // Screen dimensions
@@ -224,7 +179,67 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       );
       quizZoneCubit.getQuizCategoryWithUserId(languageId: _currLangId);
       context.read<ContestCubit>().getContest(languageId: _currLangId);
+
+      updateZoneInformations(context.read<UserDetailsCubit>());
     }
+  }
+
+  Future<void> updateZoneInformations(UserDetailsCubit cubit) async {
+    final informations = await cubit.fetchAllInformations();
+
+    // Helper function to format the title to match Firestore document IDs
+    String formatTitle(String title) {
+      switch (title) {
+        case 'groupPlay':
+          return 'Grup Savaşı';
+        case 'battleQuiz':
+          return '1 v/s 1 Savaş';
+        case 'dailyQuiz':
+          return 'Günlük Sınav';
+        case 'funAndLearn':
+          return 'Eğlen ve Öğren'; // Assuming this is correct as there's no mapping provided
+        case 'guessTheWord':
+          return 'Kelime Oyunu';
+        case 'audioQuestions':
+          return 'Sesli Oyunlar';
+        case 'mathMania':
+          return 'Matematik Çılgınlığı';
+        case 'truefalse':
+          return 'Doğru Yanlış';
+        case 'exam':
+          return 'Özel Sınavlar'; // Adjust based on actual ID if needed
+        case 'selfChallenge':
+          return 'Kendini Test Et'; // Adjust based on actual ID if needed
+        default:
+          return title;
+      }
+    }
+
+    // Update zones by matching formatted title to Firestore document ID
+    List<ZoneType> updateZones(List<ZoneType> zones) {
+      return zones.map((zone) {
+        final formattedTitle = formatTitle(zone.title);
+        final info = informations.firstWhere(
+          (info) => info.id == formattedTitle,
+          orElse: () => InformationModel(infoTitle: '', infoDescription: '', id: ''),
+        );
+        return ZoneType(
+          title: zone.title,
+          img: zone.img,
+          desc: zone.desc,
+          informationTitle: info.infoTitle.isNotEmpty ? info.infoTitle : null,
+          informationDescription: info.infoDescription.isNotEmpty ? info.infoDescription : null,
+        );
+      }).toList();
+    }
+
+    // Apply updates to each zone list
+    battleZones = updateZones(battleZones);
+    examZones = updateZones(examZones);
+    playDifferentZones = updateZones(playDifferentZones);
+
+    // This will re-render the UI to display the updated information
+    setState(() {});
   }
 
   void showAppUnderMaintenanceDialog() {
@@ -1192,8 +1207,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       onTap: () => _onPressedBattle(battleZones[i].title),
                       title: context.tr(battleZones[i].title)!,
                       desc: context.tr(battleZones[i].desc)!,
-                      informationTitle: context.tr(battleZones[i].informationTitle)!,
-                      informationDescription: context.tr(battleZones[i].informationDescription)!,
+                      informationTitle: context.tr(battleZones[i].informationTitle ?? '')!,
+                      informationDescription: context.tr(battleZones[i].informationDescription ?? '')!,
                       img: battleZones[i].img,
                     ),
                   ),
@@ -1233,8 +1248,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       onTap: () => _onPressedSelfExam(examZones[i].title),
                       title: context.tr(examZones[i].title)!,
                       desc: context.tr(examZones[i].desc)!,
-                      informationTitle: context.tr(examZones[i].informationTitle)!,
-                      informationDescription: context.tr(examZones[i].informationDescription)!,
+                      informationTitle: context.tr(examZones[i].informationTitle ?? '')!,
+                      informationDescription: context.tr(examZones[i].informationDescription ?? '')!,
                       img: examZones[i].img,
                     ),
                   ),
@@ -1278,8 +1293,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 onTap: () => _onPressedZone(playDifferentZones[i].title),
                 title: context.tr(playDifferentZones[i].title)!,
                 desc: context.tr(playDifferentZones[i].desc)!,
-                informationTitle: context.tr(playDifferentZones[i].informationTitle)!,
-                informationDescription: context.tr(playDifferentZones[i].informationDescription)!,
+                informationTitle: context.tr(playDifferentZones[i].informationTitle ?? '')!,
+                informationDescription: context.tr(playDifferentZones[i].informationDescription ?? '')!,
                 img: playDifferentZones[i].img,
               ),
             ),

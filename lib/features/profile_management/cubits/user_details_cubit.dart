@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutterquiz/features/leaderBoard/leaderboard_exception.dart';
+import 'package:flutterquiz/features/profile_management/models/information_model.dart';
 import 'package:flutterquiz/features/profile_management/models/user_profile.dart';
 import 'package:flutterquiz/features/profile_management/profile_management_repository.dart';
 import 'package:flutterquiz/utils/api_utils.dart';
@@ -30,9 +32,23 @@ class UserDetailsFetchFailure extends UserDetailsState {
 }
 
 class UserDetailsCubit extends Cubit<UserDetailsState> {
-  UserDetailsCubit(this._profileManagementRepository)
-      : super(UserDetailsInitial());
+  UserDetailsCubit(this._profileManagementRepository) : super(UserDetailsInitial());
   final ProfileManagementRepository _profileManagementRepository;
+
+  final FirebaseFirestore _firebaseFirestore = FirebaseFirestore.instance;
+
+  Future<List<InformationModel>> fetchAllInformations() async {
+    List<InformationModel> allInformations = [];
+    final collection = FirebaseFirestore.instance.collection('informations');
+
+    // Dokümanları direkt olarak çek
+    final snapshot = await collection.get();
+    for (var doc in snapshot.docs) {
+      allInformations.add(InformationModel.fromMap(doc.data()));
+    }
+
+    return allInformations;
+  }
 
   String rankM = '0';
 
@@ -41,8 +57,7 @@ class UserDetailsCubit extends Cubit<UserDetailsState> {
     emit(UserDetailsFetchInProgress());
 
     try {
-      final userProfile =
-          await _profileManagementRepository.getUserDetailsById();
+      final userProfile = await _profileManagementRepository.getUserDetailsById();
       await _fetchData(limit: '20');
       emit(UserDetailsFetchSuccess(userProfile));
     } on Exception catch (e) {
@@ -53,33 +68,25 @@ class UserDetailsCubit extends Cubit<UserDetailsState> {
   //
   // ignore: avoid_bool_literals_in_conditional_expressions
   bool get isDailyAdAvailable => (state is UserDetailsFetchSuccess)
-      ? (state as UserDetailsFetchSuccess).userProfile.isDailyAdsAvailable ??
-          false
+      ? (state as UserDetailsFetchSuccess).userProfile.isDailyAdsAvailable ?? false
       : false;
 
   Future<bool> watchedDailyAd() async {
     return _profileManagementRepository.watchedDailyAd();
   }
 
-  String getUserName() => state is UserDetailsFetchSuccess
-      ? (state as UserDetailsFetchSuccess).userProfile.name!
-      : '';
+  String getUserName() => state is UserDetailsFetchSuccess ? (state as UserDetailsFetchSuccess).userProfile.name! : '';
 
-  String userId() => state is UserDetailsFetchSuccess
-      ? (state as UserDetailsFetchSuccess).userProfile.userId!
-      : '';
+  String userId() => state is UserDetailsFetchSuccess ? (state as UserDetailsFetchSuccess).userProfile.userId! : '';
 
-  String getUserFirebaseId() => state is UserDetailsFetchSuccess
-      ? (state as UserDetailsFetchSuccess).userProfile.firebaseId!
-      : '';
+  String getUserFirebaseId() =>
+      state is UserDetailsFetchSuccess ? (state as UserDetailsFetchSuccess).userProfile.firebaseId! : '';
 
-  String? getUserMobile() => state is UserDetailsFetchSuccess
-      ? (state as UserDetailsFetchSuccess).userProfile.mobileNumber
-      : '';
+  String? getUserMobile() =>
+      state is UserDetailsFetchSuccess ? (state as UserDetailsFetchSuccess).userProfile.mobileNumber : '';
 
-  String? getUserEmail() => state is UserDetailsFetchSuccess
-      ? (state as UserDetailsFetchSuccess).userProfile.email
-      : '';
+  String? getUserEmail() =>
+      state is UserDetailsFetchSuccess ? (state as UserDetailsFetchSuccess).userProfile.email : '';
 
   void updateUserProfileUrl(String profileUrl) {
     if (state is UserDetailsFetchSuccess) {
@@ -130,8 +137,7 @@ class UserDetailsCubit extends Cubit<UserDetailsState> {
 
       final currentCoins = int.parse(oldUserDetails.coins!);
       log('Coins : $currentCoins');
-      final updatedCoins =
-          addCoin! ? (currentCoins + coins!) : (currentCoins - coins!);
+      final updatedCoins = addCoin! ? (currentCoins + coins!) : (currentCoins - coins!);
       log('After Update Coins: $updatedCoins');
       final userDetails = oldUserDetails.copyWith(
         coins: updatedCoins.toString(),
@@ -152,13 +158,10 @@ class UserDetailsCubit extends Cubit<UserDetailsState> {
     }
   }
 
-  String? getCoins() => state is UserDetailsFetchSuccess
-      ? (state as UserDetailsFetchSuccess).userProfile.coins
-      : '0';
+  String? getCoins() => state is UserDetailsFetchSuccess ? (state as UserDetailsFetchSuccess).userProfile.coins : '0';
 
-  UserProfile getUserProfile() => state is UserDetailsFetchSuccess
-      ? (state as UserDetailsFetchSuccess).userProfile
-      : UserProfile();
+  UserProfile getUserProfile() =>
+      state is UserDetailsFetchSuccess ? (state as UserDetailsFetchSuccess).userProfile : UserProfile();
 
   //
   // ignore: avoid_bool_literals_in_conditional_expressions
@@ -205,8 +208,7 @@ class UserDetailsCubit extends Cubit<UserDetailsState> {
 
       return (
         total: total,
-        otherUsersRanks:
-            (data['other_users_rank'] as List).cast<Map<String, dynamic>>(),
+        otherUsersRanks: (data['other_users_rank'] as List).cast<Map<String, dynamic>>(),
       );
     } catch (e) {
       throw LeaderBoardException(errorMessageCode: e.toString());

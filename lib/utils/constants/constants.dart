@@ -37,6 +37,7 @@ const resetTime = 'resetTime';
 const battleRoomCollection = 'battleRoom';
 const multiUserBattleRoomCollection = 'multiUserBattleRoom';
 const messagesCollection = 'messages';
+const informationsCollection = 'informations';
 
 // Phone Number
 const maxPhoneNumberLength = 16;
