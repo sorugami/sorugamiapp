@@ -50,14 +50,11 @@ class ContestScreen extends StatefulWidget {
   }
 }
 
-class _ContestScreen extends State<ContestScreen>
-    with SingleTickerProviderStateMixin {
+class _ContestScreen extends State<ContestScreen> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    context
-        .read<ContestCubit>()
-        .getContest(languageId: UiUtils.getCurrentQuizLanguageId(context));
+    context.read<ContestCubit>().getContest(languageId: UiUtils.getCurrentQuizLanguageId(context));
   }
 
   @override
@@ -88,10 +85,7 @@ class _ContestScreen extends State<ContestScreen>
                   margin: const EdgeInsets.symmetric(horizontal: 16),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(25),
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onTertiary
-                        .withValues(alpha: 0.08),
+                    color: Theme.of(context).colorScheme.onTertiary.withValues(alpha: 0.08),
                   ),
                   child: TabBar(
                     tabAlignment: TabAlignment.fill,
@@ -121,12 +115,10 @@ class _ContestScreen extends State<ContestScreen>
                 }
                 if (state is ContestFailure) {
                   return ErrorContainer(
-                    errorMessage:
-                        convertErrorCodeToLanguageKey(state.errorMessage),
+                    errorMessage: convertErrorCodeToLanguageKey(state.errorMessage),
                     onTapRetry: () {
                       context.read<ContestCubit>().getContest(
-                            languageId:
-                                UiUtils.getCurrentQuizLanguageId(context),
+                            languageId: UiUtils.getCurrentQuizLanguageId(context),
                           );
                     },
                     showErrorImage: true,
@@ -218,8 +210,7 @@ class _ContestCardState extends State<_ContestCard> {
       );
     }
     if (widget.contestType == _live) {
-      if (int.parse(context.read<UserDetailsCubit>().getCoins()!) >=
-          int.parse(widget.contestDetails.entry!)) {
+      if (int.parse(context.read<UserDetailsCubit>().getCoins()!) >= int.parse(widget.contestDetails.entry!)) {
         context.read<UpdateScoreAndCoinsCubit>().updateCoins(
               coins: int.parse(widget.contestDetails.entry!),
               addCoin: false,
@@ -333,8 +324,7 @@ class _ContestCardState extends State<_ContestCard> {
                       child: InkWell(
                         onTap: () {
                           setState(() {
-                            widget.contestDetails.showDescription =
-                                !widget.contestDetails.showDescription!;
+                            widget.contestDetails.showDescription = !widget.contestDetails.showDescription!;
                           });
                         },
                         child: Icon(
@@ -351,16 +341,11 @@ class _ContestCardState extends State<_ContestCard> {
                 ],
               ),
               SizedBox(
-                width: !widget.contestDetails.showDescription!
-                    ? size.width * .75
-                    : size.width,
+                width: !widget.contestDetails.showDescription! ? size.width * .75 : size.width,
                 child: Text(
                   widget.contestDetails.description!,
                   style: TextStyle(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onTertiary
-                        .withValues(alpha: 0.3),
+                    color: Theme.of(context).colorScheme.onTertiary.withValues(alpha: 0.3),
                   ),
                   maxLines: !widget.contestDetails.showDescription! ? 1 : 3,
                   overflow: TextOverflow.ellipsis,

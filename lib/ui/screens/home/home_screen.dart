@@ -2,10 +2,10 @@ import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -28,6 +28,7 @@ import 'package:flutterquiz/features/quiz/cubits/contest_cubit.dart';
 import 'package:flutterquiz/features/quiz/cubits/quiz_category_cubit.dart';
 import 'package:flutterquiz/features/quiz/cubits/quizzone_category_cubit.dart';
 import 'package:flutterquiz/features/quiz/cubits/subcategory_cubit.dart';
+import 'package:flutterquiz/features/quiz/models/contest.dart';
 import 'package:flutterquiz/features/quiz/models/quiz_type.dart';
 import 'package:flutterquiz/features/system_config/cubits/system_config_cubit.dart';
 import 'package:flutterquiz/ui/screens/battle/create_or_join_screen.dart';
@@ -37,7 +38,6 @@ import 'package:flutterquiz/ui/widgets/blinking_text_widget.dart';
 import 'package:flutterquiz/utils/constants/constants.dart';
 import 'package:flutterquiz/utils/extensions.dart';
 import 'package:flutterquiz/utils/ui_utils.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -79,8 +79,11 @@ typedef ZoneType = ({String title, String img, String desc, String informationTi
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   /// Quiz Zone globals
   int oldCategoriesToShowCount = 0;
+  int oldContestsToShowCount = 0;
   bool isCateListExpanded = false;
+  bool isContestsListExpanded = false;
   bool canExpandCategoryList = false;
+  bool canExpandContestsList = true;
 
   final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
@@ -862,6 +865,72 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     );
   }
 
+  Widget _buildContests(Contest livecontest, void Function() onTapPlayNow) {
+    return Column(
+      children: [
+        Wrap(
+          children: [
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Positioned(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: Theme.of(context).colorScheme.surface,
+                    ),
+                    width: context.width,
+                    child: buildLiveList(livecontest),
+                  ),
+                ),
+
+                /// Expand Arrow
+                if (canExpandContestsList) ...[
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    // Position the center bottom arrow, from here
+                    bottom: -9,
+                    child: Container(
+                      width: 50,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.transparent),
+                        shape: BoxShape.circle,
+                        color: Theme.of(context).scaffoldBackgroundColor,
+                      ),
+                      child: GestureDetector(
+                        onTap: () => setState(() {
+                          isContestsListExpanded = !isContestsListExpanded;
+                        }),
+                        child: Container(
+                          width: 30,
+                          height: 30,
+                          margin: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.surface,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            !isContestsListExpanded
+                                ? Icons.keyboard_arrow_down_rounded
+                                : Icons.keyboard_arrow_up_rounded,
+                            color: Theme.of(context).primaryColor,
+                            size: 32,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
   Widget quizZoneCategories() {
     return BlocConsumer<QuizoneCategoryCubit, QuizoneCategoryState>(
       bloc: context.read<QuizoneCategoryCubit>(),
@@ -1299,6 +1368,52 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     );
   }
 
+  Widget buildLiveList(Contest data) {
+    final int contestsToShowCount;
+    const minCount = 1;
+    final contestsDetailsLength = data.contestDetails.length;
+
+    if (oldContestsToShowCount != contestsDetailsLength) {
+      Future.delayed(Duration.zero, () {
+        oldContestsToShowCount = contestsDetailsLength;
+        canExpandContestsList = oldContestsToShowCount > minCount;
+        setState(() {});
+      });
+    }
+
+    if (!isContestsListExpanded) {
+      contestsToShowCount = contestsDetailsLength <= minCount ? contestsDetailsLength : minCount;
+    } else {
+      contestsToShowCount = contestsDetailsLength;
+    }
+
+    return data.errorMessage.isNotEmpty
+        ? contestErrorContainer(data)
+        : ListView.builder(
+            padding: const EdgeInsets.only(bottom: 10),
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: contestsToShowCount,
+            itemBuilder: (_, i) {
+              return ContestCard(
+                contestDetails: data.contestDetails[i],
+                contestType: 1,
+              );
+            },
+          );
+  }
+
+  ErrorContainer contestErrorContainer(Contest data) {
+    return ErrorContainer(
+      showBackButton: false,
+      errorMessage: convertErrorCodeToLanguageKey(data.errorMessage),
+      onTapRetry: () => context.read<ContestCubit>().getContest(
+            languageId: UiUtils.getCurrentQuizLanguageId(context),
+          ),
+      showErrorImage: true,
+    );
+  }
+
   Widget _buildLiveContestSection() {
     void onTapViewAll() {
       if (_sysConfigCubit.isContestEnabled) {
@@ -1367,13 +1482,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
               if (state is ContestSuccess) {
                 final colorScheme = Theme.of(context).colorScheme;
-                final textStyle = GoogleFonts.nunito(
-                  textStyle: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeights.regular,
-                    color: colorScheme.onTertiary.withValues(alpha: 0.6),
-                  ),
-                );
 
                 ///
                 final live = state.contestList.live;
@@ -1433,205 +1541,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   }
                 }
 
-                return Container(
-                  decoration: const BoxDecoration(
-                    color: Colors.transparent,
-                    boxShadow: [
-                      BoxShadow(
-                        offset: Offset(0, 5),
-                        blurRadius: 5,
-                        color: Colors.black12,
-                      ),
-                    ],
-                    borderRadius: BorderRadius.vertical(
-                      bottom: Radius.circular(99999),
-                    ),
-                  ),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: colorScheme.surface,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    padding: const EdgeInsets.all(12.5),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            /// Contest Image
-                            Container(
-                              padding: const EdgeInsets.all(5),
-                              decoration: BoxDecoration(
-                                color: Colors.transparent,
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(
-                                  color: Theme.of(context).scaffoldBackgroundColor,
-                                ),
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(5),
-                                child: QImage(
-                                  imageUrl: contest.image!,
-                                  height: 45,
-                                  width: 45,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-
-                            /// Contest Name & Description
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    contest.name.toString(),
-                                    textAlign: TextAlign.left,
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 2,
-                                    style: _boldTextStyle.copyWith(
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                  Text(
-                                    contest.description.toString(),
-                                    softWrap: true,
-                                    textAlign: TextAlign.left,
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 2,
-                                    style: textStyle,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const Spacer(),
-                            GestureDetector(
-                              onTap: () {
-                                showPopover(
-                                  context: context,
-                                  bodyBuilder: (context) {
-                                    return CategoryInformationBubbleWidget(
-                                      title: 'Yarışma Kuralları',
-                                      description: 'Yarışma Kuralları Açıklama',
-                                    );
-                                  },
-                                  onPop: () => print('Popover was popped!'),
-                                  direction: PopoverDirection.bottom,
-                                  width: 300,
-                                  height: 200,
-                                );
-                              },
-                              child: Text(
-                                'Yarışma Kuralları',
-                                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                                      color: Theme.of(context).primaryColor,
-                                      decoration: TextDecoration.underline,
-                                      decorationColor: Theme.of(context).primaryColor,
-                                    ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-
-                        ///
-                        Column(
-                          // runSpacing: 10,
-                          // spacing: 15,
-                          // crossAxisAlignment: WrapCrossAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                /// Entry Fees
-                                Text.rich(
-                                  TextSpan(
-                                    children: [
-                                      TextSpan(
-                                        text: context.tr('entryFeesLbl'),
-                                      ),
-                                      const TextSpan(text: ' : '),
-                                      TextSpan(
-                                        text: "$entryFee ${context.tr("coinsLbl")!}",
-                                        style: textStyle.copyWith(
-                                          color: colorScheme.onTertiary,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  style: textStyle,
-                                ),
-                                const SizedBox(height: 5),
-
-                                /// Ends on
-                                Text.rich(
-                                  style: textStyle,
-                                  TextSpan(
-                                    children: [
-                                      TextSpan(
-                                        text: context.tr('endsOnLbl'),
-                                      ),
-                                      const TextSpan(text: ' : '),
-                                      TextSpan(
-                                        text: '${contest.endDate}  |  ',
-                                        style: textStyle.copyWith(
-                                          color: colorScheme.onTertiary,
-                                        ),
-                                      ),
-                                      TextSpan(
-                                        text: contest.participants.toString(),
-                                        style: textStyle.copyWith(
-                                          color: colorScheme.onTertiary,
-                                        ),
-                                      ),
-                                      const TextSpan(text: ' : '),
-                                      TextSpan(
-                                        text: context.tr(
-                                          'playersLbl',
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 15),
-
-                            /// Play Now
-                            GestureDetector(
-                              onTap: onTapPlayNow,
-                              child: Container(
-                                width: double.maxFinite,
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 8,
-                                  horizontal: 5,
-                                ),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(8),
-                                  color: Theme.of(context).scaffoldBackgroundColor,
-                                ),
-                                child: Text(
-                                  context.tr('playnowLbl')!,
-                                  maxLines: 1,
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: Theme.of(context).primaryColor,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                );
+                return _buildContests(state.contestList.live, onTapPlayNow);
               }
 
               return const Center(child: CircularProgressContainer());
@@ -1790,6 +1700,204 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   return _buildHome();
                 },
               ),
+      ),
+    );
+  }
+}
+
+class ContestCard extends StatefulWidget {
+  const ContestCard({required this.contestDetails, required this.contestType});
+
+  final ContestDetails contestDetails;
+  final int contestType;
+
+  @override
+  State<ContestCard> createState() => ContestCardState();
+}
+
+class ContestCardState extends State<ContestCard> {
+  void _handleOnTap() {
+    if (int.parse(context.read<UserDetailsCubit>().getCoins()!) >= int.parse(widget.contestDetails.entry!)) {
+      context.read<UpdateScoreAndCoinsCubit>().updateCoins(
+            coins: int.parse(widget.contestDetails.entry!),
+            addCoin: false,
+            title: context.tr(playedContestKey) ?? '-',
+          );
+
+      context.read<UserDetailsCubit>().updateCoins(
+            addCoin: false,
+            coins: int.parse(widget.contestDetails.entry!),
+          );
+      Navigator.of(context).pushNamed(
+        Routes.quiz,
+        arguments: {
+          'numberOfPlayer': 1,
+          'quizType': QuizTypes.contest,
+          'contestId': widget.contestDetails.id,
+          'quizName': 'Contest',
+        },
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final boldTextStyle = TextStyle(
+      fontSize: 14,
+      color: Theme.of(context).colorScheme.onTertiary,
+      fontWeight: FontWeight.bold,
+    );
+    final normalTextStyle = TextStyle(
+      fontSize: 14,
+      fontWeight: FontWeights.regular,
+      color: Theme.of(context).colorScheme.onTertiary.withValues(alpha: 0.6),
+    );
+    final size = context;
+
+    final verticalDivider = SizedBox(
+      width: 1,
+      height: 30,
+      child: ColoredBox(color: Theme.of(context).scaffoldBackgroundColor),
+    );
+
+    return Container(
+      margin: const EdgeInsets.all(15),
+      width: size.width * .9,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        boxShadow: [
+          UiUtils.buildBoxShadow(
+            offset: const Offset(5, 5),
+            blurRadius: 10,
+          ),
+        ],
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: GestureDetector(
+        onTap: _handleOnTap,
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CachedNetworkImage(
+                imageUrl: widget.contestDetails.image!,
+                placeholder: (_, i) => const Center(
+                  child: CircularProgressContainer(),
+                ),
+                imageBuilder: (_, img) {
+                  return Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      image: DecorationImage(image: img, fit: BoxFit.cover),
+                    ),
+                    height: 171,
+                    width: size.width,
+                  );
+                },
+                errorWidget: (_, i, e) => Center(
+                  child: Icon(
+                    Icons.error,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: size.width * .78),
+                    child: Text(
+                      widget.contestDetails.name!,
+                      style: boldTextStyle,
+                    ),
+                  ),
+                  if (widget.contestDetails.description!.length > 50)
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5),
+                        border: Border.all(
+                          color: Theme.of(context).scaffoldBackgroundColor,
+                        ),
+                      ),
+                      alignment: Alignment.center,
+                      height: 30,
+                      width: 30,
+                      padding: EdgeInsets.zero,
+                      child: InkWell(
+                        onTap: () {
+                          setState(() {
+                            widget.contestDetails.showDescription = !widget.contestDetails.showDescription!;
+                          });
+                        },
+                        child: Icon(
+                          widget.contestDetails.showDescription!
+                              ? Icons.keyboard_arrow_up_rounded
+                              : Icons.keyboard_arrow_down_rounded,
+                          color: Theme.of(context).colorScheme.onTertiary,
+                          size: 30,
+                        ),
+                      ),
+                    )
+                  else
+                    const SizedBox(),
+                ],
+              ),
+              SizedBox(
+                width: !widget.contestDetails.showDescription! ? size.width * .75 : size.width,
+                child: Text(
+                  widget.contestDetails.description!,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onTertiary.withValues(alpha: 0.3),
+                  ),
+                  maxLines: !widget.contestDetails.showDescription! ? 1 : 3,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Divider(
+                color: Theme.of(context).scaffoldBackgroundColor,
+                height: 0,
+              ),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        context.tr('entryFeesLbl')!,
+                        style: normalTextStyle,
+                      ),
+                      Text(
+                        '${widget.contestDetails.entry!} ${context.tr('coinsLbl')!}',
+                        style: boldTextStyle,
+                      ),
+                    ],
+                  ),
+
+                  ///
+                  verticalDivider,
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        context.tr('endsOnLbl')!,
+                        style: normalTextStyle,
+                      ),
+                      Text(
+                        widget.contestDetails.endDate!,
+                        style: boldTextStyle,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
