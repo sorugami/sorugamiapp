@@ -5,11 +5,7 @@ import 'dart:developer';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:url_launcher/url_launcher.dart';
-
-import 'package:flutterquiz/features/leaderBoard/cubit/leaderboard_all_time_cubit.dart';
 import 'package:flutterquiz/features/leaderBoard/cubit/leaderboard_daily_cubit.dart';
-import 'package:flutterquiz/features/leaderBoard/cubit/leaderboard_monthly_cubit.dart';
 import 'package:flutterquiz/ui/widgets/already_logged_in_dialog.dart';
 import 'package:flutterquiz/ui/widgets/circular_progress_container.dart';
 import 'package:flutterquiz/ui/widgets/custom_appbar.dart';
@@ -20,6 +16,8 @@ import 'package:flutterquiz/utils/constants/fonts.dart';
 import 'package:flutterquiz/utils/constants/string_labels.dart';
 import 'package:flutterquiz/utils/extensions.dart';
 import 'package:flutterquiz/utils/ui_utils.dart';
+import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class LeaderBoardScreen extends StatefulWidget {
   const LeaderBoardScreen({super.key});
@@ -31,14 +29,8 @@ class LeaderBoardScreen extends StatefulWidget {
     return CupertinoPageRoute(
       builder: (_) => MultiBlocProvider(
         providers: [
-          BlocProvider<LeaderBoardMonthlyCubit>(
-            create: (_) => LeaderBoardMonthlyCubit(),
-          ),
           BlocProvider<LeaderBoardDailyCubit>(
             create: (_) => LeaderBoardDailyCubit(),
-          ),
-          BlocProvider<LeaderBoardAllTimeCubit>(
-            create: (_) => LeaderBoardAllTimeCubit(),
           ),
         ],
         child: const LeaderBoardScreen(),
@@ -48,22 +40,16 @@ class LeaderBoardScreen extends StatefulWidget {
 }
 
 class _LeaderBoardScreen extends State<LeaderBoardScreen> {
-  final controllerM = ScrollController();
-  final controllerA = ScrollController();
   final controllerD = ScrollController();
+
+  DateTimeRange? dateTimeRange;
 
   @override
   void initState() {
-    controllerM.addListener(scrollListenerM);
-    controllerA.addListener(scrollListenerA);
-    controllerD.addListener(scrollListenerD);
-
     Future.delayed(
       Duration.zero,
       () {
         context.read<LeaderBoardDailyCubit>().fetchLeaderBoard('20');
-        context.read<LeaderBoardMonthlyCubit>().fetchLeaderBoard('20');
-        context.read<LeaderBoardAllTimeCubit>().fetchLeaderBoard('20');
       },
     );
     super.initState();
@@ -71,34 +57,7 @@ class _LeaderBoardScreen extends State<LeaderBoardScreen> {
 
   @override
   void dispose() {
-    controllerM.removeListener(scrollListenerM);
-    controllerA.removeListener(scrollListenerA);
-    controllerD.removeListener(scrollListenerD);
     super.dispose();
-  }
-
-  void scrollListenerM() {
-    if (controllerM.position.maxScrollExtent == controllerM.offset) {
-      if (context.read<LeaderBoardMonthlyCubit>().hasMoreData()) {
-        context.read<LeaderBoardMonthlyCubit>().fetchMoreLeaderBoardData('20');
-      }
-    }
-  }
-
-  void scrollListenerA() {
-    if (controllerA.position.maxScrollExtent == controllerA.offset) {
-      if (context.read<LeaderBoardAllTimeCubit>().hasMoreData()) {
-        context.read<LeaderBoardAllTimeCubit>().fetchMoreLeaderBoardData('20');
-      }
-    }
-  }
-
-  void scrollListenerD() {
-    if (controllerD.position.maxScrollExtent == controllerD.offset) {
-      if (context.read<LeaderBoardDailyCubit>().hasMoreData()) {
-        context.read<LeaderBoardDailyCubit>().fetchMoreLeaderBoardData('20');
-      }
-    }
   }
 
   @override
@@ -108,40 +67,17 @@ class _LeaderBoardScreen extends State<LeaderBoardScreen> {
       child: Scaffold(
         appBar: QAppBar(
           elevation: 0,
-          title: Text(
-            context.tr('leaderboardLbl')!,
-          ),
-          bottom: TabBar(
-            tabAlignment: TabAlignment.fill,
-            tabs: [
-              Tab(
-                text: context.tr('allTimeLbl'),
-              ),
-              Tab(
-                text: context.tr('monthLbl'),
-              ),
-              Tab(
-                text: context.tr('dailyLbl'),
-              ),
-            ],
-          ),
+          title: Text(context.tr('leaderboardLbl')!),
         ),
-        body: TabBarView(
-          children: [
-            allTimeLeaderBoard(),
-            monthlyLeaderBoard(),
-            dailyLeaderBoard(),
-          ],
-        ),
+        body: dailyLeaderBoard(),
       ),
     );
   }
 
-  void fetchMonthlyLeaderBoard() => context.read<LeaderBoardMonthlyCubit>().fetchLeaderBoard('20');
-
-  void fetchDailyLeaderBoard() => context.read<LeaderBoardDailyCubit>().fetchLeaderBoard('20');
-
-  void fetchAllTimeLeaderBoard() => context.read<LeaderBoardAllTimeCubit>().fetchLeaderBoard('20');
+  void fetchDailyLeaderBoard() => context.read<LeaderBoardDailyCubit>().fetchLeaderBoard(
+        '10',
+        dateTimeRange: dateTimeRange,
+      );
 
   Widget noLeaderboard(VoidCallback onTapRetry) => Center(
         child: ErrorContainer(
@@ -149,6 +85,7 @@ class _LeaderBoardScreen extends State<LeaderBoardScreen> {
           errorMessage: 'noLeaderboardLbl',
           onTapRetry: onTapRetry,
           showErrorImage: false,
+          showRTryButton: false,
         ),
       );
 
@@ -166,13 +103,7 @@ class _LeaderBoardScreen extends State<LeaderBoardScreen> {
       },
       builder: (context, state) {
         if (state is LeaderBoardDailyFailure) {
-          return ErrorContainer(
-            showBackButton: false,
-            errorMessage: convertErrorCodeToLanguageKey(state.errorMessage),
-            onTapRetry: fetchDailyLeaderBoard,
-            showErrorImage: true,
-            errorMessageColor: Theme.of(context).primaryColor,
-          );
+          dateTimeRange = null;
         }
 
         ///
@@ -181,18 +112,52 @@ class _LeaderBoardScreen extends State<LeaderBoardScreen> {
           final hasMore = state.hasMore;
 
           /// API returns empty list if there is no leaderboard data.
-          if (dailyList.isEmpty) {
-            return noLeaderboard(fetchDailyLeaderBoard);
-          }
 
           log(name: 'Leaderboard Daily', jsonEncode(dailyList));
           log(name: 'Leaderboard Daily', 'Has More: $hasMore');
 
           return SizedBox(
-            height: context.height * 0.6,
+            height: context.height,
             child: Column(
               children: [
-                topThreeRanks(dailyList),
+                if (dailyList.isEmpty) ...{
+                  const SizedBox(height: 16),
+                  noLeaderboard(fetchDailyLeaderBoard),
+                } else
+                  topThreeRanks(dailyList),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        DateFormat('dd/MM/yyy').format(dateTimeRange != null ? dateTimeRange!.start : DateTime.now()),
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      if (dateTimeRange != null) ...{
+                        Text(
+                          ' - ${DateFormat('dd/MM/yyy').format(dateTimeRange!.end)}',
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                      },
+                      const Spacer(),
+                      IconButton(
+                        onPressed: () async {
+                          dateTimeRange = await showDateRangePicker(
+                            context: context,
+                            firstDate: DateTime.now().subtract(const Duration(days: 30)),
+                            lastDate: DateTime.now(),
+                            saveText: 'Done',
+                          );
+                          fetchDailyLeaderBoard();
+                        },
+                        icon: const Icon(Icons.date_range_outlined),
+                        iconSize: 32,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
                 leaderBoardList(dailyList, controllerD, hasMore: hasMore),
                 if (LeaderBoardDailyCubit.scoreD != '0' && int.parse(LeaderBoardDailyCubit.rankD) > 3)
                   myRank(
@@ -201,120 +166,6 @@ class _LeaderBoardScreen extends State<LeaderBoardScreen> {
                     LeaderBoardDailyCubit.scoreD,
                   ),
                 const SizedBox(height: 36),
-              ],
-            ),
-          );
-        }
-
-        return const Center(child: CircularProgressContainer());
-      },
-    );
-  }
-
-  Widget monthlyLeaderBoard() {
-    return BlocConsumer<LeaderBoardMonthlyCubit, LeaderBoardMonthlyState>(
-      bloc: context.read<LeaderBoardMonthlyCubit>(),
-      listener: (context, state) {
-        if (state is LeaderBoardMonthlyFailure) {
-          if (state.errorMessage == errorCodeUnauthorizedAccess) {
-            showAlreadyLoggedInDialog(context);
-
-            return;
-          }
-        }
-      },
-      builder: (context, state) {
-        if (state is LeaderBoardMonthlyFailure) {
-          return ErrorContainer(
-            showBackButton: false,
-            errorMessage: convertErrorCodeToLanguageKey(state.errorMessage),
-            onTapRetry: fetchMonthlyLeaderBoard,
-            showErrorImage: true,
-            errorMessageColor: Theme.of(context).primaryColor,
-          );
-        }
-
-        ///
-        if (state is LeaderBoardMonthlySuccess) {
-          final monthlyList = state.leaderBoardDetails;
-          final hasMore = state.hasMore;
-
-          /// API returns empty list if there is no leaderboard data.
-          if (monthlyList.isEmpty) {
-            return noLeaderboard(fetchMonthlyLeaderBoard);
-          }
-
-          log(name: 'Leaderboard Monthly', jsonEncode(monthlyList));
-          log(name: 'Leaderboard Monthly', 'Has More: $hasMore');
-
-          return SizedBox(
-            height: context.height * .6,
-            child: Column(
-              children: [
-                topThreeRanks(monthlyList),
-                leaderBoardList(monthlyList, controllerM, hasMore: hasMore),
-                if (LeaderBoardMonthlyCubit.scoreM != '0' && int.parse(LeaderBoardMonthlyCubit.rankM) > 3)
-                  myRank(
-                    LeaderBoardMonthlyCubit.rankM,
-                    LeaderBoardMonthlyCubit.profileM,
-                    LeaderBoardMonthlyCubit.scoreM,
-                  ),
-              ],
-            ),
-          );
-        }
-
-        return const Center(child: CircularProgressContainer());
-      },
-    );
-  }
-
-  Widget allTimeLeaderBoard() {
-    return BlocConsumer<LeaderBoardAllTimeCubit, LeaderBoardAllTimeState>(
-      bloc: context.read<LeaderBoardAllTimeCubit>(),
-      listener: (context, state) {
-        if (state is LeaderBoardAllTimeFailure) {
-          if (state.errorMessage == errorCodeUnauthorizedAccess) {
-            showAlreadyLoggedInDialog(context);
-          }
-        }
-      },
-      builder: (context, state) {
-        if (state is LeaderBoardAllTimeFailure) {
-          return ErrorContainer(
-            showBackButton: false,
-            errorMessage: convertErrorCodeToLanguageKey(state.errorMessage),
-            onTapRetry: fetchAllTimeLeaderBoard,
-            showErrorImage: true,
-            errorMessageColor: Theme.of(context).primaryColor,
-          );
-        }
-
-        ///
-        if (state is LeaderBoardAllTimeSuccess) {
-          final allTimeList = state.leaderBoardDetails;
-          final hasMore = state.hasMore;
-
-          /// API returns empty list if there is no leaderboard data.
-          if (allTimeList.isEmpty) {
-            return noLeaderboard(fetchDailyLeaderBoard);
-          }
-
-          log(name: 'Leaderboard All Time', jsonEncode(allTimeList));
-          log(name: 'Leaderboard All Time', 'Has More: $hasMore');
-
-          return SizedBox(
-            height: context.height * .6,
-            child: Column(
-              children: [
-                topThreeRanks(allTimeList),
-                leaderBoardList(allTimeList, controllerA, hasMore: hasMore),
-                if (LeaderBoardAllTimeCubit.scoreA != '0' && int.parse(LeaderBoardAllTimeCubit.rankA) > 3)
-                  myRank(
-                    LeaderBoardAllTimeCubit.rankA,
-                    LeaderBoardAllTimeCubit.profileA,
-                    LeaderBoardAllTimeCubit.scoreA,
-                  ),
               ],
             ),
           );
@@ -455,6 +306,26 @@ class _LeaderBoardScreen extends State<LeaderBoardScreen> {
                       decoration: TextDecoration.underline,
                       decorationColor: Theme.of(context).primaryColor,
                     ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16.0),
+            child: GestureDetector(
+              onTap: () async {
+                await _launchURL();
+              },
+              child: SizedBox(
+                width: context.width / 1.2,
+                child: Text(
+                  'Geçmişe dönük skorlarınızı görmek için takvimden tarih aralığı seçiniz',
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        fontSize: 12,
+                        color: Theme.of(context).dividerColor,
+                        decorationColor: Theme.of(context).primaryColor,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
               ),
             ),
           ),

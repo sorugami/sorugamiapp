@@ -91,6 +91,9 @@ class ZoneType {
   String? informationDescription;
 }
 
+ZoneType liveContestZone = ZoneType(title: 'contests', img: Assets.examQuizIcon, desc: 'desLiveContest');
+ZoneType quizCategoriesZone = ZoneType(title: 'lessons', img: Assets.examQuizIcon, desc: 'desQuizCategories');
+
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   /// Quiz Zone globals
   int oldCategoriesToShowCount = 0;
@@ -210,6 +213,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           return 'Özel Sınavlar'; // Adjust based on actual ID if needed
         case 'selfChallenge':
           return 'Kendini Test Et'; // Adjust based on actual ID if needed
+        case 'contests':
+          return 'Yarışmalar';
+        case 'lessons':
+          return 'Dersler';
         default:
           return title;
       }
@@ -237,7 +244,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     battleZones = updateZones(battleZones);
     examZones = updateZones(examZones);
     playDifferentZones = updateZones(playDifferentZones);
-
+    liveContestZone = updateZones([liveContestZone]).first;
+    quizCategoriesZone = updateZones([quizCategoriesZone]).first;
     // This will re-render the UI to display the updated information
     setState(() {});
   }
@@ -895,7 +903,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       color: Theme.of(context).colorScheme.surface,
                     ),
                     width: context.width,
-                    child: buildLiveList(livecontest),
+                    child: Column(
+                      children: [
+                        buildLiveList(livecontest),
+                      ],
+                    ),
                   ),
                 ),
 
@@ -1014,8 +1026,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       context: context,
                       bodyBuilder: (context) {
                         return CategoryInformationBubbleWidget(
-                          title: 'informationTitle',
-                          description: 'informationDescription',
+                          title: quizCategoriesZone.informationTitle,
+                          description: quizCategoriesZone.informationDescription,
                         );
                       },
                       onPop: () => print('Popover was popped!'),
@@ -1410,9 +1422,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             physics: const NeverScrollableScrollPhysics(),
             itemCount: contestsToShowCount,
             itemBuilder: (_, i) {
-              return ContestCard(
-                contestDetails: data.contestDetails[i],
-                contestType: 1,
+              return Column(
+                children: [
+                  ContestCard(
+                    contestDetails: data.contestDetails[i],
+                    contestType: 1,
+                  ),
+                ],
               );
             },
           );
@@ -1600,6 +1616,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 languageId: _currLangId,
               );
               await context.read<ContestCubit>().getContest(languageId: _currLangId);
+              await updateZoneInformations(context.read<UserDetailsCubit>());
             }
             setState(() {});
           },
@@ -1795,6 +1812,34 @@ class ContestCardState extends State<ContestCard> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Align(
+                alignment: Alignment.centerRight,
+                child: GestureDetector(
+                  onTap: () {
+                    showPopover(
+                      context: context,
+                      bodyBuilder: (context) {
+                        return CategoryInformationBubbleWidget(
+                          title: liveContestZone.informationTitle,
+                          description: liveContestZone.informationDescription,
+                        );
+                      },
+                      onPop: () => print('Popover was popped!'),
+                      direction: PopoverDirection.bottom,
+                      width: 300,
+                      height: 200,
+                    );
+                  },
+                  child: Text(
+                    'Detaylar',
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                          color: Theme.of(context).primaryColor,
+                          decoration: TextDecoration.underline,
+                          decorationColor: Theme.of(context).primaryColor,
+                        ),
+                  ),
+                ),
+              ),
               CachedNetworkImage(
                 imageUrl: widget.contestDetails.image!,
                 placeholder: (_, i) => const Center(

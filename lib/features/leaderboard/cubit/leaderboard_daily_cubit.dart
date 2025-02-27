@@ -6,6 +6,7 @@ import 'package:flutterquiz/features/leaderBoard/leaderboard_exception.dart';
 import 'package:flutterquiz/utils/api_utils.dart';
 import 'package:flutterquiz/utils/constants/constants.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 
 @immutable
 abstract class LeaderBoardDailyState {}
@@ -33,7 +34,7 @@ class LeaderBoardDailyFailure extends LeaderBoardDailyState {
 }
 
 class LeaderBoardDailyCubit extends Cubit<LeaderBoardDailyState> {
-  LeaderBoardDailyCubit() : super(LeaderBoardDailyInitial());
+  LeaderBoardDailyCubit() : super(LeaderBoardDailyInitial()) {}
   static late String profileD;
   static late String nameD;
   static late String scoreD;
@@ -41,15 +42,23 @@ class LeaderBoardDailyCubit extends Cubit<LeaderBoardDailyState> {
 
   Future<({int total, List<Map<String, dynamic>> otherUsersRanks})> _fetchData({
     required String limit,
+    DateTimeRange? dateTimeRange,
     String? offset,
   }) async {
     try {
       final body = <String, String>{
         limitKey: limit,
         offsetKey: offset ?? '',
+        'start_date': DateFormat('yyy-MM-dd').format(dateTimeRange?.start ?? DateTime.now()),
+        'end_date': DateFormat('yyy-MM-dd').format(dateTimeRange?.end ?? DateTime.now()),
       };
 
       if (offset == null) body.remove(offset);
+      if (dateTimeRange == null) {
+        body
+          ..remove('start_date')
+          ..remove('end_date');
+      }
 
       final response = await http.post(
         Uri.parse(getDailyLeaderboardUrl),
@@ -83,17 +92,16 @@ class LeaderBoardDailyCubit extends Cubit<LeaderBoardDailyState> {
 
       return (
         total: total,
-        otherUsersRanks:
-            (data['other_users_rank'] as List).cast<Map<String, dynamic>>(),
+        otherUsersRanks: (data['other_users_rank'] as List).cast<Map<String, dynamic>>(),
       );
     } catch (e) {
       throw LeaderBoardException(errorMessageCode: e.toString());
     }
   }
 
-  Future<void> fetchLeaderBoard(String limit) async {
+  Future<void> fetchLeaderBoard(String limit, {DateTimeRange? dateTimeRange}) async {
     emit(LeaderBoardDailyProgress());
-    await _fetchData(limit: limit).then((v) {
+    await _fetchData(limit: limit, dateTimeRange: dateTimeRange).then((v) {
       emit(
         LeaderBoardDailySuccess(
           v.otherUsersRanks,
@@ -105,34 +113,4 @@ class LeaderBoardDailyCubit extends Cubit<LeaderBoardDailyState> {
       emit(LeaderBoardDailyFailure(e.toString()));
     });
   }
-
-  void fetchMoreLeaderBoardData(String limit) {
-    _fetchData(
-      limit: limit,
-      offset: (state as LeaderBoardDailySuccess)
-          .leaderBoardDetails
-          .length
-          .toString(),
-    ).then((v) {
-      final oldState = state as LeaderBoardDailySuccess;
-      final updatedUserDetails = oldState.leaderBoardDetails
-        ..addAll(v.otherUsersRanks);
-
-      emit(
-        LeaderBoardDailySuccess(
-          updatedUserDetails,
-          oldState.totalData,
-          hasMore: oldState.totalData > updatedUserDetails.length,
-        ),
-      );
-    }).catchError((dynamic e) {
-      emit(LeaderBoardDailyFailure(e.toString()));
-    });
-  }
-
-  //
-  // ignore: avoid_bool_literals_in_conditional_expressions
-  bool hasMoreData() => state is LeaderBoardDailySuccess
-      ? (state as LeaderBoardDailySuccess).hasMore
-      : false;
 }
