@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutterquiz/app/routes.dart';
 import 'package:flutterquiz/features/ads/interstitial_ad_cubit.dart';
 import 'package:flutterquiz/features/ads/rewarded_ad_cubit.dart';
@@ -55,8 +56,7 @@ Future<Widget> initializeApp() async {
   );
 
   await Firebase.initializeApp();
-  FirebaseFirestore.instance.settings =
-      const Settings(persistenceEnabled: false);
+  FirebaseFirestore.instance.settings = const Settings(persistenceEnabled: false);
 
   // Local phone storage
   await Hive.initFlutter();
@@ -156,9 +156,7 @@ class MyApp extends StatelessWidget {
           );
 
           return AnnotatedRegion<SystemUiOverlayStyle>(
-            value: (currentTheme == AppTheme.light
-                    ? SystemUiOverlayStyle.dark
-                    : SystemUiOverlayStyle.light)
+            value: (currentTheme == AppTheme.light ? SystemUiOverlayStyle.dark : SystemUiOverlayStyle.light)
                 .copyWith(statusBarColor: Colors.transparent),
             child: MaterialApp(
               title: appName,
@@ -166,8 +164,7 @@ class MyApp extends StatelessWidget {
                 return ScrollConfiguration(
                   behavior: const _GlobalScrollBehavior(),
                   child: Directionality(
-                    textDirection:
-                        isRTL ? TextDirection.rtl : TextDirection.ltr,
+                    textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
                     child: widget!,
                   ),
                 );
@@ -176,6 +173,15 @@ class MyApp extends StatelessWidget {
               debugShowCheckedModeBanner: false,
               initialRoute: Routes.splash,
               onGenerateRoute: Routes.onGenerateRouted,
+              localizationsDelegates: const [
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
+              supportedLocales: const [
+                Locale('tr', 'TR'), // Türkçe yerel ayarı
+                Locale('en', 'US'), // İngilizce yerel ayarı
+              ],
             ),
           );
         },

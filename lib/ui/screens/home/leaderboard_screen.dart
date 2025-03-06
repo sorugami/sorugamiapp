@@ -147,7 +147,8 @@ class _LeaderBoardScreen extends State<LeaderBoardScreen> {
                             context: context,
                             firstDate: DateTime.now().subtract(const Duration(days: 30)),
                             lastDate: DateTime.now(),
-                            saveText: 'Done',
+                            saveText: 'Tamam',
+                            locale: const Locale('tr', 'TR'),
                           );
                           fetchDailyLeaderBoard();
                         },
