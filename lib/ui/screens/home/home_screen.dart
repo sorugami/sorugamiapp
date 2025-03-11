@@ -1471,7 +1471,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               ),
               GestureDetector(
                 onTap: onTapViewAll,
-                child: const BlinkingTextWidget(viewAllKey: viewAllKey),
+                child: const BlinkingTextWidget(viewAllKey: 'Yarışmaya Katıl'),
               ),
             ],
           ),
@@ -1749,27 +1749,27 @@ class ContestCard extends StatefulWidget {
 
 class ContestCardState extends State<ContestCard> {
   void _handleOnTap() {
-    if (int.parse(context.read<UserDetailsCubit>().getCoins()!) >= int.parse(widget.contestDetails.entry!)) {
-      context.read<UpdateScoreAndCoinsCubit>().updateCoins(
-            coins: int.parse(widget.contestDetails.entry!),
-            addCoin: false,
-            title: context.tr(playedContestKey) ?? '-',
-          );
+    // if (int.parse(context.read<UserDetailsCubit>().getCoins()!) >= int.parse(widget.contestDetails.entry!)) {
+    //   context.read<UpdateScoreAndCoinsCubit>().updateCoins(
+    //         coins: int.parse(widget.contestDetails.entry!),
+    //         addCoin: false,
+    //         title: context.tr(playedContestKey) ?? '-',
+    //       );
 
-      context.read<UserDetailsCubit>().updateCoins(
-            addCoin: false,
-            coins: int.parse(widget.contestDetails.entry!),
-          );
-      Navigator.of(context).pushNamed(
-        Routes.quiz,
-        arguments: {
-          'numberOfPlayer': 1,
-          'quizType': QuizTypes.contest,
-          'contestId': widget.contestDetails.id,
-          'quizName': 'Contest',
-        },
-      );
-    }
+    //   context.read<UserDetailsCubit>().updateCoins(
+    //         addCoin: false,
+    //         coins: int.parse(widget.contestDetails.entry!),
+    //       );
+    //   Navigator.of(context).pushNamed(
+    //     Routes.quiz,
+    //     arguments: {
+    //       'numberOfPlayer': 1,
+    //       'quizType': QuizTypes.contest,
+    //       'contestId': widget.contestDetails.id,
+    //       'quizName': 'Contest',
+    //     },
+    //   );
+    // }
   }
 
   @override

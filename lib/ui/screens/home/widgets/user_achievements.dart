@@ -4,6 +4,7 @@ import 'package:flutterquiz/utils/constants/fonts.dart';
 import 'package:flutterquiz/utils/extensions.dart';
 import 'package:flutterquiz/utils/ui_utils.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class UserAchievements extends StatelessWidget {
   const UserAchievements({
@@ -71,7 +72,7 @@ class UserAchievements extends StatelessWidget {
               ),
             ),
             Container(
-              height: 100,
+              height: 135,
               decoration: BoxDecoration(
                 color: Theme.of(context).primaryColor,
                 borderRadius: BorderRadius.circular(10),
@@ -84,30 +85,55 @@ class UserAchievements extends StatelessWidget {
                 vertical: size.height * UiUtils.vtMarginPct,
                 horizontal: size.width * UiUtils.hzMarginPct,
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
+              child: Column(
                 children: [
-                  GestureDetector(
-                    onTap: onTapLeaderboard,
-                    child: _Achievement(
-                      title: rank,
-                      value: numberFormat.format(double.parse(userRank)),
+                  Expanded(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        GestureDetector(
+                          onTap: onTapLeaderboard,
+                          child: _Achievement(
+                            title: rank,
+                            value: numberFormat.format(double.parse(userRank)),
+                          ),
+                        ),
+                        _verticalDivider,
+                        GestureDetector(
+                          onTap: onTapCoins,
+                          child: _Achievement(
+                            title: coins,
+                            value: numberFormat.format(double.parse(userCoins)),
+                          ),
+                        ),
+                        _verticalDivider,
+                        GestureDetector(
+                          onTap: onTapCoins,
+                          child: _Achievement(
+                            title: score,
+                            value: numberFormat.format(double.parse(userScore)),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  _verticalDivider,
-                  GestureDetector(
-                    onTap: onTapCoins,
-                    child: _Achievement(
-                      title: coins,
-                      value: numberFormat.format(double.parse(userCoins)),
-                    ),
-                  ),
-                  _verticalDivider,
-                  GestureDetector(
-                    onTap: onTapCoins,
-                    child: _Achievement(
-                      title: score,
-                      value: numberFormat.format(double.parse(userScore)),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 16),
+                    child: Center(
+                      child: GestureDetector(
+                        onTap: () async {
+                          await _launchURL();
+                        },
+                        child: Text(
+                          'Ödülleri görmek için tıklayınız.',
+                          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                                fontSize: 14,
+                                color: Colors.white,
+                                decoration: TextDecoration.underline,
+                                decorationColor: Colors.white,
+                              ),
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -117,6 +143,22 @@ class UserAchievements extends StatelessWidget {
         );
       },
     );
+  }
+
+  Future<void> _launchURL() async {
+    final Uri url = Uri.parse('https://www.sorugami.com/oduller/');
+    try {
+      final launched = await launchUrl(
+        url,
+        mode: LaunchMode.externalApplication,
+      );
+      if (!launched) {
+        throw Exception("Could not launch $url");
+      }
+    } catch (e) {
+      print("Error launching URL: $e");
+      rethrow; // Optionally rethrow the error if needed
+    }
   }
 }
 
