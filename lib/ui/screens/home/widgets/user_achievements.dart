@@ -46,33 +46,11 @@ class UserAchievements extends StatelessWidget {
         final size = context;
         final numberFormat = NumberFormat.compact();
 
-        return Stack(
+        return Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Positioned(
-              top: 0,
-              left: constraints.maxWidth * (0.05),
-              right: constraints.maxWidth * (0.05),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.transparent,
-                  boxShadow: [
-                    BoxShadow(
-                      offset: const Offset(0, 25),
-                      blurRadius: 30,
-                      spreadRadius: 3,
-                      color: Theme.of(context).primaryColor.withValues(alpha: 0.5),
-                    ),
-                  ],
-                  borderRadius: BorderRadius.vertical(
-                    bottom: Radius.circular(constraints.maxWidth * (0.525)),
-                  ),
-                ),
-                width: constraints.maxWidth,
-                height: 100,
-              ),
-            ),
             Container(
-              height: 135,
+              height: 105,
               decoration: BoxDecoration(
                 color: Theme.of(context).primaryColor,
                 borderRadius: BorderRadius.circular(10),
@@ -82,61 +60,69 @@ class UserAchievements extends StatelessWidget {
                 horizontal: 20,
               ),
               margin: EdgeInsets.symmetric(
-                vertical: size.height * UiUtils.vtMarginPct,
+                vertical: (size.height * UiUtils.vtMarginPct) - 10,
                 horizontal: size.width * UiUtils.hzMarginPct,
               ),
-              child: Column(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  Expanded(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        GestureDetector(
-                          onTap: onTapLeaderboard,
-                          child: _Achievement(
-                            title: rank,
-                            value: numberFormat.format(double.parse(userRank)),
-                          ),
-                        ),
-                        _verticalDivider,
-                        GestureDetector(
-                          onTap: onTapCoins,
-                          child: _Achievement(
-                            title: coins,
-                            value: numberFormat.format(double.parse(userCoins)),
-                          ),
-                        ),
-                        _verticalDivider,
-                        GestureDetector(
-                          onTap: onTapCoins,
-                          child: _Achievement(
-                            title: score,
-                            value: numberFormat.format(double.parse(userScore)),
-                          ),
-                        ),
-                      ],
+                  GestureDetector(
+                    onTap: onTapLeaderboard,
+                    child: _Achievement(
+                      title: rank,
+                      value: numberFormat.format(double.parse(userRank)),
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 16),
-                    child: Center(
-                      child: GestureDetector(
-                        onTap: () async {
-                          await _launchURL();
-                        },
-                        child: Text(
-                          'Ödülleri görmek için tıklayınız.',
-                          style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                                fontSize: 14,
-                                color: Colors.white,
-                                decoration: TextDecoration.underline,
-                                decorationColor: Colors.white,
-                              ),
-                        ),
-                      ),
+                  _verticalDivider,
+                  GestureDetector(
+                    onTap: onTapCoins,
+                    child: _Achievement(
+                      title: coins,
+                      value: numberFormat.format(double.parse(userCoins)),
+                    ),
+                  ),
+                  _verticalDivider,
+                  GestureDetector(
+                    onTap: onTapCoins,
+                    child: _Achievement(
+                      title: score,
+                      value: numberFormat.format(double.parse(userScore)),
                     ),
                   ),
                 ],
+              ),
+            ),
+            GestureDetector(
+              onTap: () async {
+                await _launchURL();
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 4,
+                  horizontal: 16,
+                ),
+                margin: EdgeInsets.symmetric(
+                      horizontal: size.width * UiUtils.hzMarginPct,
+                    ) +
+                    EdgeInsets.only(
+                      bottom: size.height * UiUtils.vtMarginPct,
+                    ),
+                child: Center(
+                  child: Text(
+                    'Ödülleri görmek için tıklayınız.',
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                          fontSize: 14,
+                          color: Colors.white,
+                          decoration: TextDecoration.none,
+                          decorationColor: Colors.white,
+                          fontWeight: FontWeights.bold,
+                        ),
+                  ),
+                ),
               ),
             ),
           ],

@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutterquiz/app/routes.dart';
@@ -12,7 +10,6 @@ import 'package:flutterquiz/ui/widgets/custom_image.dart';
 import 'package:flutterquiz/ui/widgets/error_container.dart';
 import 'package:flutterquiz/utils/constants/constants.dart';
 import 'package:flutterquiz/utils/gdpr_helper.dart';
-import 'package:unity_ads_plugin/unity_ads_plugin.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -21,8 +18,7 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen>
-    with TickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMixin {
   late AnimationController _logoAnimationController;
   late Animation<double> _logoScaleUpAnimation;
   late Animation<double> _logoScaleDownAnimation;
@@ -76,16 +72,6 @@ class _SplashScreenState extends State<SplashScreen>
     _logoAnimationController.forward();
   }
 
-  Future<void> _initUnityAds() async {
-    await UnityAds.init(
-      gameId: context.read<SystemConfigCubit>().unityGameId,
-      testMode: true,
-      onComplete: () => log('Initialized', name: 'Unity Ads'),
-      onFailed: (err, msg) =>
-          log('Initialization Failed: $err $msg', name: 'Unity Ads'),
-    );
-  }
-
   Future<void> _fetchSystemConfig() async {
     await context.read<SystemConfigCubit>().getSystemConfig();
     await GdprHelper.initialize();
@@ -94,26 +80,20 @@ class _SplashScreenState extends State<SplashScreen>
   Future<void> _navigateToNextScreen() async {
     if (!_systemConfigLoaded) return;
 
-    await _initUnityAds();
-
-    final showIntroSlider =
-        context.read<SettingsCubit>().state.settingsModel!.showIntroSlider;
+    final showIntroSlider = context.read<SettingsCubit>().state.settingsModel!.showIntroSlider;
     final currAuthState = context.read<AuthCubit>().state;
 
     if (showIntroSlider) {
       /// Set Default Quiz Language
       if (context.read<SystemConfigCubit>().isLanguageModeEnabled) {
-        final defaultQuizLanguage = context
-            .read<SystemConfigCubit>()
-            .supportedQuizLanguages
-            .firstWhere((e) => e.isDefault);
+        final defaultQuizLanguage =
+            context.read<SystemConfigCubit>().supportedQuizLanguages.firstWhere((e) => e.isDefault);
 
         context.read<QuizLanguageCubit>().languageId = defaultQuizLanguage.id;
       }
 
       /// Navigate to language select screen if more than one language is available
-      if (context.read<AppLocalizationCubit>().state.systemLanguages.length >
-          1) {
+      if (context.read<AppLocalizationCubit>().state.systemLanguages.length > 1) {
         await Navigator.of(context).pushReplacementNamed(Routes.languageSelect);
       } else {
         await Navigator.of(context).pushReplacementNamed(Routes.introSlider);
@@ -181,8 +161,7 @@ class _SplashScreenState extends State<SplashScreen>
                     child: AnimatedBuilder(
                       animation: _logoAnimationController,
                       builder: (_, __) => Transform.scale(
-                        scale: _logoScaleUpAnimation.value -
-                            _logoScaleDownAnimation.value,
+                        scale: _logoScaleUpAnimation.value - _logoScaleDownAnimation.value,
                         child: QImage(
                           imageUrl: _appLogoPath,
                           width: 200,

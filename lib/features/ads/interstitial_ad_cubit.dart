@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/widgets.dart';
@@ -6,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutterquiz/features/profile_management/cubits/user_details_cubit.dart';
 import 'package:flutterquiz/features/system_config/cubits/system_config_cubit.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:unity_ads_plugin/unity_ads_plugin.dart';
 
 abstract class InterstitialAdState {}
 
@@ -41,24 +39,13 @@ class InterstitialAdCubit extends Cubit<InterstitialAdState> {
     );
   }
 
-  void _createUnityAds() {
-    UnityAds.load(
-      placementId: unityInterstitialPlacement(),
-      onComplete: (placementId) => emit(InterstitialAdLoaded()),
-      onFailed: (placementId, err, msg) => emit(InterstitialAdFailToLoad()),
-    );
-  }
-
   void createInterstitialAd(BuildContext context) {
     final systemConfigCubit = context.read<SystemConfigCubit>();
-    if (systemConfigCubit.isAdsEnable &&
-        !context.read<UserDetailsCubit>().removeAds()) {
+    if (systemConfigCubit.isAdsEnable && !context.read<UserDetailsCubit>().removeAds()) {
       emit(InterstitialAdLoadInProgress());
       final adsType = systemConfigCubit.adsType;
       if (adsType == 1) {
         _createGoogleInterstitialAd(context);
-      } else {
-        _createUnityAds();
       }
     }
   }
@@ -66,8 +53,7 @@ class InterstitialAdCubit extends Cubit<InterstitialAdState> {
   void showAd(BuildContext context) {
     //if ad is enable
     final sysConfigCubit = context.read<SystemConfigCubit>();
-    if (sysConfigCubit.isAdsEnable &&
-        !context.read<UserDetailsCubit>().removeAds()) {
+    if (sysConfigCubit.isAdsEnable && !context.read<UserDetailsCubit>().removeAds()) {
       //if ad loaded succesfully
       if (state is InterstitialAdLoaded) {
         //show google interstitial ad
@@ -78,25 +64,13 @@ class InterstitialAdCubit extends Cubit<InterstitialAdState> {
               ad.dispose();
               createInterstitialAd(context);
             },
-            onAdFailedToShowFullScreenContent:
-                (InterstitialAd ad, AdError error) {
+            onAdFailedToShowFullScreenContent: (InterstitialAd ad, AdError error) {
               ad.dispose();
               createInterstitialAd(context);
             },
           );
           interstitialAd?.show();
-        } else {
-          //show Unity interstitial ad
-          UnityAds.showVideoAd(
-            placementId: unityInterstitialPlacement(),
-            onComplete: (placementId) => createInterstitialAd(context),
-            onFailed: (placementId, error, message) =>
-                log('Video Ad $placementId failed: $error $message'),
-            onStart: (placementId) => log('Video Ad $placementId started'),
-            onClick: (placementId) => log('Video Ad $placementId click'),
-            onSkipped: (placementId) => createInterstitialAd(context),
-          );
-        }
+        } else {}
       } else if (state is InterstitialAdFailToLoad) {
         createInterstitialAd(context);
       }

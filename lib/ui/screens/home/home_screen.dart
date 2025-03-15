@@ -157,7 +157,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     setupInteractedMessage();
 
     /// Create Ads
-    Future.delayed(Duration.zero, () async {
+    Future.delayed(const Duration(seconds: 2), () async {
       await context.read<RewardedAdCubit>().createDailyRewardAd(context);
       context.read<InterstitialAdCubit>().createInterstitialAd(context);
     });

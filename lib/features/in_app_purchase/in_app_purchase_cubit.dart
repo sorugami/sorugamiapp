@@ -105,8 +105,7 @@ class InAppPurchaseCubit extends Cubit<InAppPurchaseState> {
   //it will load products form store
   Future<void> _loadProducts(List<String> productIds) async {
     //load products for purchase (consumable product)
-    final productDetailResponse =
-        await inAppPurchase.queryProductDetails(productIds.toSet());
+    final productDetailResponse = await inAppPurchase.queryProductDetails(productIds.toSet());
     if (productDetailResponse.error != null) {
       //error while getting products from store
       emit(
@@ -125,8 +124,7 @@ class InAppPurchaseCubit extends Cubit<InAppPurchaseState> {
         ),
       );
     } else {
-      productDetailResponse.productDetails
-          .sort((first, second) => first.rawPrice.compareTo(second.rawPrice));
+      productDetailResponse.productDetails.sort((first, second) => first.rawPrice.compareTo(second.rawPrice));
       emit(
         InAppPurchaseAvailable(
           products: productDetailResponse.productDetails,
@@ -157,8 +155,7 @@ class InAppPurchaseCubit extends Cubit<InAppPurchaseState> {
 
   Future<void> _purchaseUpdate(List<PurchaseDetails> purchaseDetails) async {
     for (final purchaseDetail in purchaseDetails) {
-      if (purchaseDetail.status == PurchaseStatus.error ||
-          purchaseDetail.status == PurchaseStatus.canceled) {
+      if (purchaseDetail.status == PurchaseStatus.error || purchaseDetail.status == PurchaseStatus.canceled) {
         emit(
           InAppPurchaseProcessFailure(
             errorMessage: purchaseDetail.error?.message ?? purchaseErrorKey,
@@ -172,15 +169,13 @@ class InAppPurchaseCubit extends Cubit<InAppPurchaseState> {
           InAppPurchaseProcessSuccess(
             products: _getProducts(),
             purchasedProductId: purchaseDetail.productID,
-            purchaseToken:
-                purchaseDetail.verificationData.serverVerificationData,
+            purchaseToken: purchaseDetail.verificationData.serverVerificationData,
           ),
         );
       }
 
       if (Platform.isAndroid) {
-        final androidAddition = inAppPurchase
-            .getPlatformAddition<InAppPurchaseAndroidPlatformAddition>();
+        final androidAddition = inAppPurchase.getPlatformAddition<InAppPurchaseAndroidPlatformAddition>();
         await androidAddition.consumePurchase(purchaseDetail);
       }
 

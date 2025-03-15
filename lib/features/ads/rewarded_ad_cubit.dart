@@ -9,7 +9,6 @@ import 'package:flutterquiz/utils/constants/error_message_keys.dart';
 import 'package:flutterquiz/utils/extensions.dart';
 import 'package:flutterquiz/utils/ui_utils.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:unity_ads_plugin/unity_ads_plugin.dart';
 
 abstract class RewardedAdState {}
 
@@ -48,25 +47,14 @@ class RewardedAdCubit extends Cubit<RewardedAdState> {
     );
   }
 
-  void createUnityRewardsAd() {
-    UnityAds.load(
-      placementId: unityRewardsPlacement(),
-      onComplete: (placementId) => emit(RewardedAdLoaded()),
-      onFailed: (p, e, m) => emit(RewardedAdFailure()),
-    );
-  }
-
   void createRewardedAd(BuildContext context) {
     emit(RewardedAdLoadInProgress());
 
     final sysConfigCubit = context.read<SystemConfigCubit>();
-    if (sysConfigCubit.isAdsEnable &&
-        !context.read<UserDetailsCubit>().removeAds()) {
+    if (sysConfigCubit.isAdsEnable && !context.read<UserDetailsCubit>().removeAds()) {
       if (sysConfigCubit.adsType == 1) {
         _createGoogleRewardedAd(context);
-      } else {
-        createUnityRewardsAd();
-      }
+      } else {}
     }
   }
 
@@ -74,13 +62,10 @@ class RewardedAdCubit extends Cubit<RewardedAdState> {
     emit(RewardedAdLoadInProgress());
 
     final sysConfig = context.read<SystemConfigCubit>();
-    if (sysConfig.isAdsEnable &&
-        !context.read<UserDetailsCubit>().removeAds()) {
+    if (sysConfig.isAdsEnable && !context.read<UserDetailsCubit>().removeAds()) {
       if (sysConfig.adsType == 1) {
         _createGoogleRewardedAd(context);
-      } else {
-        createUnityRewardsAd();
-      }
+      } else {}
     }
   }
 
@@ -125,36 +110,7 @@ class RewardedAdCubit extends Cubit<RewardedAdState> {
             });
           },
         );
-      } else {
-        await UnityAds.showVideoAd(
-          placementId: unityRewardsPlacement(),
-          onComplete: (_) async {
-            await userDetails.watchedDailyAd().then((_) async {
-              await context.read<UserDetailsCubit>().fetchUserDetails();
-
-              if (!context.mounted) return;
-
-              UiUtils.showSnackBar(
-                "${context.tr("earnedLbl")!} "
-                '${sysConfigCubit.coinsPerDailyAdView} '
-                "${context.tr("coinsLbl")!}",
-                context,
-                duration: const Duration(seconds: 2),
-              );
-            }).catchError((dynamic e) {
-              if (e.toString() == errorCodeDailyAdsLimitSucceeded) {
-                UiUtils.showSnackBar(
-                  context.tr('dailyAdsLimitExceeded')!,
-                  context,
-                );
-              }
-            });
-            log('Watched Daily Ad', name: 'Admob Ads');
-
-            return createDailyRewardAd(context);
-          },
-        );
-      }
+      } else {}
     } else if (state is RewardedAdFailure) {
       await createDailyRewardAd(context);
     }
@@ -166,8 +122,7 @@ class RewardedAdCubit extends Cubit<RewardedAdState> {
   }) {
     //if ads is enable
     final sysConfigCubit = context.read<SystemConfigCubit>();
-    if (sysConfigCubit.isAdsEnable &&
-        !context.read<UserDetailsCubit>().removeAds()) {
+    if (sysConfigCubit.isAdsEnable && !context.read<UserDetailsCubit>().removeAds()) {
       if (state is RewardedAdLoaded) {
         //if google ad is enable
         if (sysConfigCubit.adsType == 1) {
@@ -185,19 +140,7 @@ class RewardedAdCubit extends Cubit<RewardedAdState> {
             },
           );
           rewardedAd?.show(onUserEarnedReward: (_, __) => {});
-        } else {
-          UnityAds.showVideoAd(
-            placementId: unityRewardsPlacement(),
-            onComplete: (placementId) {
-              onAdDismissedCallback();
-              createRewardedAd(context);
-            },
-            onFailed: (placementId, error, message) =>
-                log('Video Ad $placementId failed: $error $message'),
-            onStart: (placementId) => log('Video Ad $placementId started'),
-            onClick: (placementId) => log('Video Ad $placementId click'),
-          );
-        }
+        } else {}
       } else if (state is RewardedAdFailure) {
         //create reward ad if ad is not loaded successfully
         createRewardedAd(context);

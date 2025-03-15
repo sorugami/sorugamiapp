@@ -26,7 +26,7 @@
         android:fullBackupOnly="false"
         android:requestLegacyExternalStorage="true"
         android:extractNativeLibs="true">
-
+        <meta-data android:name="flutter.renderer" android:value="vk"/>
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@drawable/ic_notification" />

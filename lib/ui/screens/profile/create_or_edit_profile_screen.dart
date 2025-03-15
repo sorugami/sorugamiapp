@@ -643,7 +643,7 @@ class _SelectProfilePictureScreen extends State<CreateOrEditProfileScreen> {
         Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
-            color: colorScheme.onTertiary.withValues(alpha: 0.2),
+            color: colorScheme.surface,
           ),
           width: context.width,
           height: 50,
@@ -651,7 +651,6 @@ class _SelectProfilePictureScreen extends State<CreateOrEditProfileScreen> {
             validator: (_) => null,
             cursorColor: colorScheme.onTertiary,
             controller: nameController,
-            readOnly: true,
             style: TextStyle(
               color: colorScheme.onTertiary,
               fontWeight: FontWeight.bold,

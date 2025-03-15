@@ -1279,6 +1279,8 @@ PODS:
     - OrderedSet (~> 6.0.3)
   - flutter_local_notifications (0.0.1):
     - Flutter
+  - flutter_localization (0.0.1):
+    - Flutter
   - flutter_pdfview (1.0.2):
     - Flutter
   - Google-Mobile-Ads-SDK (11.10.0):
@@ -1485,10 +1487,6 @@ PODS:
     - Flutter
     - FlutterMacOS
   - TOCropViewController (2.7.4)
-  - unity_ads_plugin (0.0.1):
-    - Flutter
-    - UnityAds (= 4.12.5)
-  - UnityAds (4.12.5)
   - url_launcher_ios (0.0.1):
     - Flutter
   - video_player_avfoundation (0.0.1):
@@ -1511,6 +1509,7 @@ DEPENDENCIES:
   - Flutter (from `Flutter`)
   - flutter_inappwebview_ios (from `.symlinks/plugins/flutter_inappwebview_ios/ios`)
   - flutter_local_notifications (from `.symlinks/plugins/flutter_local_notifications/ios`)
+  - flutter_localization (from `.symlinks/plugins/flutter_localization/ios`)
   - flutter_pdfview (from `.symlinks/plugins/flutter_pdfview/ios`)
   - google_mobile_ads (from `.symlinks/plugins/google_mobile_ads/ios`)
   - google_sign_in_ios (from `.symlinks/plugins/google_sign_in_ios/darwin`)
@@ -1526,7 +1525,6 @@ DEPENDENCIES:
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
   - sign_in_with_apple (from `.symlinks/plugins/sign_in_with_apple/ios`)
   - sqflite_darwin (from `.symlinks/plugins/sqflite_darwin/darwin`)
-  - unity_ads_plugin (from `.symlinks/plugins/unity_ads_plugin/ios`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
   - video_player_avfoundation (from `.symlinks/plugins/video_player_avfoundation/darwin`)
   - wakelock_plus (from `.symlinks/plugins/wakelock_plus/ios`)
@@ -1566,7 +1564,6 @@ SPEC REPOS:
     - PromisesObjC
     - RecaptchaInterop
     - TOCropViewController
-    - UnityAds
 
 EXTERNAL SOURCES:
   audio_session:
@@ -1589,6 +1586,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_inappwebview_ios/ios"
   flutter_local_notifications:
     :path: ".symlinks/plugins/flutter_local_notifications/ios"
+  flutter_localization:
+    :path: ".symlinks/plugins/flutter_localization/ios"
   flutter_pdfview:
     :path: ".symlinks/plugins/flutter_pdfview/ios"
   google_mobile_ads:
@@ -1619,8 +1618,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/sign_in_with_apple/ios"
   sqflite_darwin:
     :path: ".symlinks/plugins/sqflite_darwin/darwin"
-  unity_ads_plugin:
-    :path: ".symlinks/plugins/unity_ads_plugin/ios"
   url_launcher_ios:
     :path: ".symlinks/plugins/url_launcher_ios/ios"
   video_player_avfoundation:
@@ -1657,6 +1654,7 @@ SPEC CHECKSUMS:
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   flutter_inappwebview_ios: b89ba3482b96fb25e00c967aae065701b66e9b99
   flutter_local_notifications: 395056b3175ba4f08480a7c5de30cd36d69827e4
+  flutter_localization: 72299fb6cb4e51cae587bd953ed0b958040b71e6
   flutter_pdfview: 32bf27bda6fd85b9dd2c09628a824df5081246cf
   Google-Mobile-Ads-SDK: 13e6e98edfd78ad8d8a791edb927658cc260a56f
   google_mobile_ads: dc2b2a5884bef7ab2b4ff30022a513df5373e208
@@ -1688,8 +1686,6 @@ SPEC CHECKSUMS:
   sign_in_with_apple: c5dcc141574c8c54d5ac99dd2163c0c72ad22418
   sqflite_darwin: 20b2a3a3b70e43edae938624ce550a3cbf66a3d0
   TOCropViewController: 80b8985ad794298fb69d3341de183f33d1853654
-  unity_ads_plugin: ac4c604de87a30b1a7e84ef81751883ae415303a
-  UnityAds: a4036ed911b4df2227d8137f4f777fcb86c4a2df
   url_launcher_ios: 694010445543906933d732453a59da0a173ae33d
   video_player_avfoundation: 2cef49524dd1f16c5300b9cd6efd9611ce03639b
   wakelock_plus: 04623e3f525556020ebd4034310f20fe7fda8b49

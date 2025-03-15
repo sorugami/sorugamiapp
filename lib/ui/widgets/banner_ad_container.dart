@@ -7,7 +7,6 @@ import 'package:flutterquiz/features/profile_management/cubits/user_details_cubi
 import 'package:flutterquiz/features/system_config/cubits/system_config_cubit.dart';
 import 'package:flutterquiz/utils/extensions.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:unity_ads_plugin/unity_ads_plugin.dart';
 
 class BannerAdContainer extends StatefulWidget {
   const BannerAdContainer({super.key});
@@ -18,7 +17,6 @@ class BannerAdContainer extends StatefulWidget {
 
 class _BannerAdContainer extends State<BannerAdContainer> {
   BannerAd? _googleBannerAd;
-  UnityBannerAd? _unityBannerAd;
 
   @override
   void initState() {
@@ -36,8 +34,7 @@ class _BannerAdContainer extends State<BannerAdContainer> {
   void _initBannerAd() {
     Future.delayed(Duration.zero, () {
       final systemConfigCubit = context.read<SystemConfigCubit>();
-      if (systemConfigCubit.isAdsEnable &&
-          !context.read<UserDetailsCubit>().removeAds()) {
+      if (systemConfigCubit.isAdsEnable && !context.read<UserDetailsCubit>().removeAds()) {
         //is google ad enable or not
         if (systemConfigCubit.adsType == 1) {
           _createGoogleBannerAd();
@@ -49,13 +46,6 @@ class _BannerAdContainer extends State<BannerAdContainer> {
   }
 
   Future<void> _createUnityBannerAd() async {
-    _unityBannerAd = UnityBannerAd(
-      placementId: unityBannerAdsPlacement(),
-      onLoad: (placementId) => log('Banner loaded: $placementId'),
-      onClick: (placementId) => log('Banner clicked: $placementId'),
-      onFailed: (placementId, error, message) =>
-          log('Banner Ad $placementId failed: $error $message'),
-    );
     setState(() {});
   }
 
@@ -83,8 +73,7 @@ class _BannerAdContainer extends State<BannerAdContainer> {
   @override
   Widget build(BuildContext context) {
     final sysConfig = context.read<SystemConfigCubit>();
-    if (sysConfig.isAdsEnable &&
-        !context.read<UserDetailsCubit>().removeAds()) {
+    if (sysConfig.isAdsEnable && !context.read<UserDetailsCubit>().removeAds()) {
       if (sysConfig.adsType == 1) {
         return _googleBannerAd != null
             ? SizedBox(
@@ -93,8 +82,6 @@ class _BannerAdContainer extends State<BannerAdContainer> {
                 child: AdWidget(ad: _googleBannerAd!),
               )
             : const SizedBox();
-      } else {
-        return _unityBannerAd ?? const SizedBox();
       }
     }
     return const SizedBox();
