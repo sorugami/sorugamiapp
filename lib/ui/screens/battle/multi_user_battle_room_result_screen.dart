@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -16,7 +18,6 @@ import 'package:flutterquiz/ui/widgets/custom_rounded_button.dart';
 import 'package:flutterquiz/utils/constants/assets_constants.dart';
 import 'package:flutterquiz/utils/constants/error_message_keys.dart';
 import 'package:flutterquiz/utils/constants/fonts.dart';
-import 'package:flutterquiz/utils/constants/string_labels.dart';
 import 'package:flutterquiz/utils/extensions.dart';
 import 'package:flutterquiz/utils/ui_utils.dart';
 
@@ -33,8 +34,7 @@ class MultiUserBattleRoomResultScreen extends StatefulWidget {
   final int totalQuestions;
 
   @override
-  State<MultiUserBattleRoomResultScreen> createState() =>
-      _MultiUserBattleRoomResultScreenState();
+  State<MultiUserBattleRoomResultScreen> createState() => _MultiUserBattleRoomResultScreenState();
 
   static Route<dynamic> route(RouteSettings routeSettings) {
     final args = routeSettings.arguments as Map<String, dynamic>?;
@@ -51,8 +51,7 @@ class MultiUserBattleRoomResultScreen extends StatefulWidget {
   }
 }
 
-class _MultiUserBattleRoomResultScreenState
-    extends State<MultiUserBattleRoomResultScreen> {
+class _MultiUserBattleRoomResultScreenState extends State<MultiUserBattleRoomResultScreen> {
   List<Map<String, dynamic>> usersWithRank = [];
 
   @override
@@ -65,65 +64,47 @@ class _MultiUserBattleRoomResultScreenState
   }
 
   void getResultAndUpdateCoins() {
-    //create new array of map that creates user and rank
+    // Kullanıcıları ve rütbeleri oluşturma
     for (final element in widget.users) {
       usersWithRank.add({'user': element});
     }
-    final points = usersWithRank
-        .map((d) => (d['user'] as UserBattleRoomDetails).correctAnswers)
-        .toSet()
-        .toList()
-      ..sort((first, second) => second.compareTo(first));
+    final points = usersWithRank.map((d) => (d['user'] as UserBattleRoomDetails).correctAnswers).toList()
+      ..sort((first, second) => second.compareTo(first)); // Doğru cevap sayısına göre büyükten küçüğe sırala
 
     for (final userDetails in usersWithRank) {
-      final rank = points.indexOf(
-            (userDetails['user'] as UserBattleRoomDetails).correctAnswers,
-          ) +
-          1;
+      final rank = points.indexOf((userDetails['user'] as UserBattleRoomDetails).correctAnswers) + 1;
       userDetails.addAll({'rank': rank});
     }
     usersWithRank.sort(
-      (first, second) => int.parse(first['rank'].toString())
-          .compareTo(int.parse(second['rank'].toString())),
+      (first, second) => int.parse(first['rank'].toString()).compareTo(int.parse(second['rank'].toString())),
     );
-    //
-    Future.delayed(Duration.zero, () {
-      final currentUser = usersWithRank
-          .where(
-            (element) =>
-                (element['user'] as UserBattleRoomDetails).uid ==
-                context.read<UserDetailsCubit>().userId(),
-          )
-          .toList()
-          .first;
-      final totalWinner = usersWithRank
-          .where((element) => element['rank'] == 1)
-          .toList()
-          .length;
-      final winAmount = widget.entryFee * (widget.users.length / totalWinner);
 
-      if (currentUser['rank'] == 1) {
-        //update badge if locked
-        if (context.read<BadgesCubit>().isBadgeLocked('clash_winner')) {
-          context.read<BadgesCubit>().setBadge(badgeType: 'clash_winner');
+    // UI güncellemeleri için gecikmeli bir eylem
+    Future.delayed(Duration.zero, () {
+      final currentUser = usersWithRank.where((element) => (element['user'] as UserBattleRoomDetails).uid == context.read<UserDetailsCubit>().userId()).toList().first;
+
+      // Rozet güncellemesi (kazanan için)
+      if (currentUser['rank'] == 1 && context.read<BadgesCubit>().isBadgeLocked('clash_winner')) {
+        context.read<BadgesCubit>().setBadge(badgeType: 'clash_winner');
+      }
+
+      // Puan güncelleme her kullanıcı için
+      for (final userDetails in usersWithRank) {
+        int scoreToAdd;
+        if (userDetails['rank'] == 1) {
+          scoreToAdd = 10 + (userDetails['user'] as UserBattleRoomDetails).correctAnswers * 2; // Kazanan için ekstra puan
+        } else {
+          scoreToAdd = (userDetails['user'] as UserBattleRoomDetails).correctAnswers * 2; // Diğer kullanıcılar için puan
         }
 
-        //add coins
-        //update coins
-
-        context.read<UpdateScoreAndCoinsCubit>().updateCoins(
-              coins: winAmount.toInt(),
-              addCoin: true,
-              title: wonGroupBattleKey,
-            );
-        context.read<UserDetailsCubit>().updateCoins(
-              addCoin: true,
-              coins: winAmount.toInt(),
-            );
-        //update winAmount in ui as well
-        setState(() {});
-        //
+        // Puan güncellemesi
+        if ((userDetails['user'] as UserBattleRoomDetails).uid == context.read<UserDetailsCubit>().userId()) {
+          context.read<UpdateScoreAndCoinsCubit>().updateScore(scoreToAdd);
+        }
       }
+
+      // UI'da gösterilen bilgileri güncelle
+      setState(() {});
     });
   }
 

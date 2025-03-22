@@ -46,20 +46,20 @@ const inBetweenQuestionTimeInSeconds = 1;
 
 //predefined messages for battle
 const predefinedMessages = [
-  'Hello..!!',
-  'How are you..?',
-  'Fine..!!',
-  'Have a nice day..',
-  'Well played',
-  'What a performance..!!',
-  'Thanks..',
-  'Welcome..',
-  'Merry Christmas',
-  'Happy new year',
-  'Happy Diwali',
-  'Good night',
-  'Hurry Up',
-  'Dudeeee',
+  'Merhaba..!!',
+  'Nasılsın..?',
+  'İyiyim..!!',
+  'İyi günler..',
+  'Güzel oynadın',
+  'Ne performans..!!',
+  'Teşekkürler..',
+  'Rica ederim..',
+  'Mutlu Noeller',
+  'Mutlu Yıllar',
+  'Mutlu Diwali',
+  'İyi geceler',
+  'Acele et',
+  'Dostummmm',
 ];
 
 //constants for badges and rewards
@@ -69,12 +69,12 @@ const minimumQuestionsForBadges = 5;
 ///Add your exam rules here
 ///
 const examRules = [
-  'I will not copy and give this exam with honesty',
-  'If you lock your phone then exam will complete automatically',
-  "If you minimize application or open other application and don't come back to application with in 5 seconds then exam will complete automatically",
-  'Screen recording is prohibited',
-  'In Android screenshot capturing is prohibited',
-  'In ios, if you take screenshot then rules will violate and it will inform to examiner',
+  'Bu sınavı dürüstçe tamamlayacağım ve kopya çekmeyeceğim',
+  'Telefonunuzu kilitlemeniz durumunda sınav otomatik olarak tamamlanacaktır',
+  'Uygulamayı küçültürseniz veya başka bir uygulama açıp 5 saniye içinde uygulamaya geri dönmezseniz sınav otomatik olarak tamamlanacaktır',
+  'Ekran kaydı yasaktır',
+  'Android’de ekran görüntüsü almak yasaktır',
+  'iOS\'ta ekran görüntüsü alırsanız kuralları ihlal etmiş olursunuz ve bu durum sınav görevlisine bildirilecektir',
 ];
 
 //
@@ -87,8 +87,8 @@ List<String> payoutRequestNotes(
   String coins,
 ) {
   return [
-    'Minimum Redeemable amount is $payoutRequestCurrency $amount ($coins Coins).',
-    'Payout will take 3 - 5 working days',
+    'Minimum çekilebilir tutar $payoutRequestCurrency $amount ($coins Coin).',
+    'Ödeme yapılması 3 - 5 iş günü sürecektir',
   ];
 }
 

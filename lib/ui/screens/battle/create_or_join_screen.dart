@@ -62,11 +62,8 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
   void initState() {
     super.initState();
     WakelockPlus.enable();
-    isInAppPurchaseEnabled =
-        context.read<SystemConfigCubit>().isCoinStoreEnabled;
-    minEntryCoins = widget.quizType == QuizTypes.oneVsOneBattle
-        ? context.read<SystemConfigCubit>().oneVsOneBattleMinimumEntryFee
-        : context.read<SystemConfigCubit>().groupBattleMinimumEntryFee;
+    isInAppPurchaseEnabled = context.read<SystemConfigCubit>().isCoinStoreEnabled;
+    minEntryCoins = widget.quizType == QuizTypes.oneVsOneBattle ? context.read<SystemConfigCubit>().oneVsOneBattleMinimumEntryFee : context.read<SystemConfigCubit>().groupBattleMinimumEntryFee;
 
     entryFees = [
       minEntryCoins,
@@ -98,22 +95,16 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
   }
 
   bool isCategoryEnabled() {
-    return widget.quizType == QuizTypes.oneVsOneBattle
-        ? context.read<SystemConfigCubit>().isCategoryEnabledForOneVsOneBattle
-        : context.read<SystemConfigCubit>().isCategoryEnabledForGroupBattle;
+    return widget.quizType == QuizTypes.oneVsOneBattle ? context.read<SystemConfigCubit>().isCategoryEnabledForOneVsOneBattle : context.read<SystemConfigCubit>().isCategoryEnabledForGroupBattle;
   }
 
   RoomCodeCharType get roomCodeCharType =>
-      widget.quizType == QuizTypes.oneVsOneBattle
-          ? context.read<SystemConfigCubit>().oneVsOneBattleRoomCodeCharType
-          : context.read<SystemConfigCubit>().groupBattleRoomCodeCharType;
+      widget.quizType == QuizTypes.oneVsOneBattle ? context.read<SystemConfigCubit>().oneVsOneBattleRoomCodeCharType : context.read<SystemConfigCubit>().groupBattleRoomCodeCharType;
 
   void _addCoinsAfterRewardAd() {
     final rewardAdsCoins = context.read<SystemConfigCubit>().rewardAdsCoins;
 
-    context
-        .read<UserDetailsCubit>()
-        .updateCoins(addCoin: true, coins: rewardAdsCoins);
+    context.read<UserDetailsCubit>().updateCoins(addCoin: true, coins: rewardAdsCoins);
 
     context.read<UpdateScoreAndCoinsCubit>().updateCoins(
           coins: rewardAdsCoins,
@@ -193,9 +184,7 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
             items: values.map((e) => e['name']).toList().map((name) {
               return DropdownMenuItem(
                 value: name,
-                child: name == selectCategoryKey
-                    ? Text(context.tr(selectCategoryKey)!)
-                    : Text(name!),
+                child: name == selectCategoryKey ? Text(context.tr(selectCategoryKey)!) : Text(name!),
               );
             }).toList(),
           ),
@@ -212,12 +201,8 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
       widget.quizType == QuizTypes.oneVsOneBattle ? 'randomLbl' : 'groupPlay',
     );
 
-    context
-        .read<MultiUserBattleRoomCubit>()
-        .updateState(MultiUserBattleRoomInitial(), cancelSubscription: true);
-    context
-        .read<BattleRoomCubit>()
-        .updateState(BattleRoomInitial(), cancelSubscription: true);
+    context.read<MultiUserBattleRoomCubit>().updateState(MultiUserBattleRoomInitial(), cancelSubscription: true);
+    context.read<BattleRoomCubit>().updateState(BattleRoomInitial(), cancelSubscription: true);
 
     showModalBottomSheet<void>(
       isScrollControlled: true,
@@ -279,14 +264,12 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
                       bloc: context.read<QuizCategoryCubit>(),
                       listener: (_, state) {
                         if (state is QuizCategorySuccess) {
-                          selectedCategory =
-                              state.categories.first.categoryName!;
+                          selectedCategory = state.categories.first.categoryName!;
                           selectedCategoryId = state.categories.first.id!;
                         }
 
                         if (state is QuizCategoryFailure) {
-                          if (state.errorMessage ==
-                              errorCodeUnauthorizedAccess) {
+                          if (state.errorMessage == errorCodeUnauthorizedAccess) {
                             showAlreadyLoggedInDialog(context);
                             return;
                           }
@@ -297,8 +280,7 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
                               shadowColor: Colors.transparent,
                               actions: [
                                 TextButton(
-                                  onPressed: () =>
-                                      Navigator.of(context).pop(true),
+                                  onPressed: () => Navigator.of(context).pop(true),
                                   child: Text(
                                     context.tr(retryLbl)!,
                                     style: TextStyle(
@@ -382,41 +364,39 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
                         return Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           mainAxisSize: MainAxisSize.min,
-                          children: entryFees
-                              .map((e) => _coinCard(e, state))
-                              .toList(),
+                          children: entryFees.map((e) => _coinCard(e, state)).toList(),
                         );
                       },
                     ),
                   ),
                   const SizedBox(height: 14),
-                  Container(
-                    margin: EdgeInsets.symmetric(
-                      horizontal: context.width * UiUtils.hzMarginPct,
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    decoration: BoxDecoration(
-                      color: colorScheme.surface,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: TextField(
-                      controller: customEntryFee,
-                      keyboardType: TextInputType.number,
-                      style: TextStyle(
-                        color: colorScheme.onTertiary,
-                        fontWeight: FontWeights.regular,
-                        fontSize: 16,
-                      ),
-                      decoration: InputDecoration(
-                        border: InputBorder.none,
-                        hintText: context.tr('plsEnterTheCoins'),
-                        hintStyle: TextStyle(
-                          color: colorScheme.onTertiary.withValues(alpha: .4),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 35),
+                  // Container(
+                  //   margin: EdgeInsets.symmetric(
+                  //     horizontal: context.width * UiUtils.hzMarginPct,
+                  //   ),
+                  //   padding: const EdgeInsets.symmetric(horizontal: 20),
+                  //   decoration: BoxDecoration(
+                  //     color: colorScheme.surface,
+                  //     borderRadius: BorderRadius.circular(8),
+                  //   ),
+                  //   child: TextField(
+                  //     controller: customEntryFee,
+                  //     keyboardType: TextInputType.number,
+                  //     style: TextStyle(
+                  //       color: colorScheme.onTertiary,
+                  //       fontWeight: FontWeights.regular,
+                  //       fontSize: 16,
+                  //     ),
+                  //     decoration: InputDecoration(
+                  //       border: InputBorder.none,
+                  //       hintText: context.tr('plsEnterTheCoins'),
+                  //       hintStyle: TextStyle(
+                  //         color: colorScheme.onTertiary.withValues(alpha: .4),
+                  //       ),
+                  //     ),
+                  //   ),
+                  // ),
+                  // const SizedBox(height: 35),
                   Padding(
                     padding: EdgeInsets.symmetric(
                       horizontal: context.width * UiUtils.hzMarginPct,
@@ -430,8 +410,7 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
                             Text(
                               context.tr('yourCoins')!,
                               style: TextStyle(
-                                color: colorScheme.onTertiary
-                                    .withValues(alpha: 0.6),
+                                color: colorScheme.onTertiary.withValues(alpha: 0.6),
                                 fontWeight: FontWeights.regular,
                                 fontSize: 16,
                               ),
@@ -471,9 +450,7 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
                                   child: Text(
                                     context.tr('buyCoins')!,
                                     style: TextStyle(
-                                      color: state is BattleRoomCreating
-                                          ? Theme.of(context).disabledColor
-                                          : Theme.of(context).primaryColor,
+                                      color: state is BattleRoomCreating ? Theme.of(context).disabledColor : Theme.of(context).primaryColor,
                                       fontSize: 14,
                                       height: 1.2,
                                       fontWeight: FontWeights.medium,
@@ -483,13 +460,11 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
                               },
                             )
                           else
-                            BlocBuilder<MultiUserBattleRoomCubit,
-                                MultiUserBattleRoomState>(
+                            BlocBuilder<MultiUserBattleRoomCubit, MultiUserBattleRoomState>(
                               builder: (context, state) {
                                 return TextButton(
                                   onPressed: () {
-                                    if (state
-                                        is MultiUserBattleRoomInProgress) {
+                                    if (state is MultiUserBattleRoomInProgress) {
                                       return;
                                     }
 
@@ -510,10 +485,7 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
                                   child: Text(
                                     context.tr('buyCoins')!,
                                     style: TextStyle(
-                                      color:
-                                          state is MultiUserBattleRoomInProgress
-                                              ? Theme.of(context).disabledColor
-                                              : Theme.of(context).primaryColor,
+                                      color: state is MultiUserBattleRoomInProgress ? Theme.of(context).disabledColor : Theme.of(context).primaryColor,
                                       fontSize: 14,
                                       height: 1.2,
                                       fontWeight: FontWeights.medium,
@@ -533,8 +505,7 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
                       bloc: context.read<BattleRoomCubit>(),
                       listener: (context, state) {
                         if (state is BattleRoomFailure) {
-                          if (state.errorMessageCode ==
-                              errorCodeUnauthorizedAccess) {
+                          if (state.errorMessageCode == errorCodeUnauthorizedAccess) {
                             showAlreadyLoggedInDialog(context);
                             return;
                           }
@@ -561,8 +532,7 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
                               ? const CircularProgressContainer()
                               : CustomRoundedButton(
                                   widthPercentage: context.width,
-                                  backgroundColor:
-                                      Theme.of(context).primaryColor,
+                                  backgroundColor: Theme.of(context).primaryColor,
                                   radius: 10,
                                   showBorder: false,
                                   height: 50,
@@ -583,12 +553,9 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
                                       return;
                                     }
 
-                                    final userProfile = context
-                                        .read<UserDetailsCubit>()
-                                        .getUserProfile();
+                                    final userProfile = context.read<UserDetailsCubit>().getUserProfile();
 
-                                    if (int.parse(userProfile.coins!) <
-                                        entryFee) {
+                                    if (int.parse(userProfile.coins!) < entryFee) {
                                       showAdDialog();
                                       return;
                                     }
@@ -602,13 +569,10 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
                                           name: userProfile.name,
                                           profileUrl: userProfile.profileUrl,
                                           uid: userProfile.userId,
-                                          questionLanguageId:
-                                              UiUtils.getCurrentQuizLanguageId(
+                                          questionLanguageId: UiUtils.getCurrentQuizLanguageId(
                                             context,
                                           ),
-                                          charType: context
-                                              .read<SystemConfigCubit>()
-                                              .oneVsOneBattleRoomCodeCharType,
+                                          charType: context.read<SystemConfigCubit>().oneVsOneBattleRoomCodeCharType,
                                         );
                                   },
                                   buttonTitle: context.tr('createRoom'),
@@ -617,13 +581,11 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
                       },
                     )
                   else
-                    BlocConsumer<MultiUserBattleRoomCubit,
-                        MultiUserBattleRoomState>(
+                    BlocConsumer<MultiUserBattleRoomCubit, MultiUserBattleRoomState>(
                       bloc: context.read<MultiUserBattleRoomCubit>(),
                       listener: (_, state) {
                         if (state is MultiUserBattleRoomFailure) {
-                          if (state.errorMessageCode ==
-                              errorCodeUnauthorizedAccess) {
+                          if (state.errorMessageCode == errorCodeUnauthorizedAccess) {
                             showAlreadyLoggedInDialog(context);
                             return;
                           }
@@ -650,14 +612,12 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
                               ? const CircularProgressContainer()
                               : CustomRoundedButton(
                                   widthPercentage: context.width,
-                                  backgroundColor:
-                                      Theme.of(context).primaryColor,
+                                  backgroundColor: Theme.of(context).primaryColor,
                                   radius: 10,
                                   showBorder: false,
                                   height: 50,
                                   onTap: () {
-                                    if (state
-                                        is MultiUserBattleRoomInProgress) {
+                                    if (state is MultiUserBattleRoomInProgress) {
                                       return;
                                     }
 
@@ -670,37 +630,29 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
                                       return;
                                     }
 
-                                    final userProfile = context
-                                        .read<UserDetailsCubit>()
-                                        .getUserProfile();
+                                    final userProfile = context.read<UserDetailsCubit>().getUserProfile();
 
                                     if (customEntryFee.text != '') {
                                       entryFee = int.parse(customEntryFee.text);
                                     }
 
-                                    if (int.parse(userProfile.coins!) <
-                                        entryFee) {
+                                    if (int.parse(userProfile.coins!) < entryFee) {
                                       showAdDialog();
                                       return;
                                     }
 
                                     /// Create Room
-                                    context
-                                        .read<MultiUserBattleRoomCubit>()
-                                        .createRoom(
+                                    context.read<MultiUserBattleRoomCubit>().createRoom(
                                           categoryId: selectedCategoryId,
                                           categoryName: selectedCategory,
                                           categoryImage: selectedCategoryImage,
-                                          charType: context
-                                              .read<SystemConfigCubit>()
-                                              .groupBattleRoomCodeCharType,
+                                          charType: context.read<SystemConfigCubit>().groupBattleRoomCodeCharType,
                                           entryFee: entryFee,
                                           name: userProfile.name,
                                           profileUrl: userProfile.profileUrl,
                                           roomType: 'public',
                                           uid: userProfile.userId,
-                                          questionLanguageId:
-                                              UiUtils.getCurrentQuizLanguageId(
+                                          questionLanguageId: UiUtils.getCurrentQuizLanguageId(
                                             context,
                                           ),
                                         );
@@ -791,11 +743,7 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
                 //if game is ready to play
                 if (state.battleRoom.readyToPlay!) {
                   //if user has joined room then navigate to quiz screen
-                  if (state.battleRoom.user1!.uid !=
-                      context
-                          .read<UserDetailsCubit>()
-                          .getUserProfile()
-                          .userId) {
+                  if (state.battleRoom.user1!.uid != context.read<UserDetailsCubit>().getUserProfile().userId) {
                     Navigator.of(context).pushReplacementNamed(
                       Routes.battleRoomQuiz,
                       arguments: {
@@ -808,11 +756,7 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
 
                 //if owner deleted the room then show this dialog
                 if (!state.isRoomExist) {
-                  if (context
-                          .read<UserDetailsCubit>()
-                          .getUserProfile()
-                          .userId !=
-                      state.battleRoom.user1!.uid) {
+                  if (context.read<UserDetailsCubit>().getUserProfile().userId != state.battleRoom.user1!.uid) {
                     //Room destroyed by owner
                     showRoomDestroyed(context);
                   }
@@ -822,12 +766,8 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
             builder: (context, battleState) {
               var showShareIcon = true;
               if (battleState is BattleRoomUserFound) {
-                shareText = battleState.battleRoom.user2!.uid ==
-                        context.read<UserDetailsCubit>().userId()
-                    ? context.tr('waitGameWillStartLbl')!
-                    : shareText;
-                showShareIcon = battleState.battleRoom.user2!.uid !=
-                    context.read<UserDetailsCubit>().userId();
+                shareText = battleState.battleRoom.user2!.uid == context.read<UserDetailsCubit>().userId() ? context.tr('waitGameWillStartLbl')! : shareText;
+                showShareIcon = battleState.battleRoom.user2!.uid != context.read<UserDetailsCubit>().userId();
               }
 
               return StatefulBuilder(
@@ -851,8 +791,7 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               PopScope(
-                                canPop: battleState is! BattleRoomCreated &&
-                                    battleState is! BattleRoomUserFound,
+                                canPop: battleState is! BattleRoomCreated && battleState is! BattleRoomUserFound,
                                 onPopInvokedWithResult: (didPop, _) {
                                   if (didPop) return;
 
@@ -863,9 +802,7 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
                                   child: Icon(
                                     Icons.arrow_back_rounded,
                                     size: 24,
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onTertiary,
+                                    color: Theme.of(context).colorScheme.onTertiary,
                                   ),
                                 ),
                               ),
@@ -883,22 +820,14 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
                                     return InkWell(
                                       onTap: () => _shareRoomCode(
                                         context: context,
-                                        roomCode: context
-                                            .read<BattleRoomCubit>()
-                                            .getRoomCode(),
-                                        categoryName: context
-                                            .read<BattleRoomCubit>()
-                                            .categoryName,
-                                        entryFee: context
-                                            .read<BattleRoomCubit>()
-                                            .getEntryFee(),
+                                        roomCode: context.read<BattleRoomCubit>().getRoomCode(),
+                                        categoryName: context.read<BattleRoomCubit>().categoryName,
+                                        entryFee: context.read<BattleRoomCubit>().getEntryFee(),
                                       ),
                                       child: Icon(
                                         Icons.share,
                                         size: 20,
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onTertiary,
+                                        color: Theme.of(context).colorScheme.onTertiary,
                                       ),
                                     );
                                   },
@@ -913,18 +842,12 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
 
                         /// Invite Code
                         BattleInviteCard(
-                          categoryImage:
-                              context.read<BattleRoomCubit>().categoryImage,
-                          categoryName:
-                              context.read<BattleRoomCubit>().categoryName,
-                          entryFee:
-                              context.read<BattleRoomCubit>().getEntryFee(),
-                          roomCode:
-                              context.read<BattleRoomCubit>().getRoomCode(),
+                          categoryImage: context.read<BattleRoomCubit>().categoryImage,
+                          categoryName: context.read<BattleRoomCubit>().categoryName,
+                          entryFee: context.read<BattleRoomCubit>().getEntryFee(),
+                          roomCode: context.read<BattleRoomCubit>().getRoomCode(),
                           shareText: shareText,
-                          categoryEnabled: context
-                              .read<SystemConfigCubit>()
-                              .isCategoryEnabledForOneVsOneBattle,
+                          categoryEnabled: context.read<SystemConfigCubit>().isCategoryEnabledForOneVsOneBattle,
                         ),
                         const SizedBox(height: 20),
                         Expanded(
@@ -945,9 +868,7 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
                                       isCreator: true,
                                     ),
                                     inviteRoomUserCard(
-                                      state.battleRoom.user2!.name.isEmpty
-                                          ? context.tr('player2')!
-                                          : state.battleRoom.user2!.name,
+                                      state.battleRoom.user2!.name.isEmpty ? context.tr('player2')! : state.battleRoom.user2!.name,
                                       state.battleRoom.user2!.profileUrl,
                                       isCreator: false,
                                     ),
@@ -969,9 +890,7 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
                                       isCreator: true,
                                     ),
                                     inviteRoomUserCard(
-                                      state.battleRoom.user2!.name.isEmpty
-                                          ? context.tr('player2')!
-                                          : state.battleRoom.user2!.name,
+                                      state.battleRoom.user2!.name.isEmpty ? context.tr('player2')! : state.battleRoom.user2!.name,
                                       state.battleRoom.user2!.profileUrl,
                                       isCreator: false,
                                     ),
@@ -989,13 +908,11 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
                             if (state is BattleRoomCreated) {
                               return Padding(
                                 padding: EdgeInsets.symmetric(
-                                  horizontal:
-                                      scrWidth * UiUtils.hzMarginPct + 10,
+                                  horizontal: scrWidth * UiUtils.hzMarginPct + 10,
                                 ),
                                 child: TextButton(
                                   style: TextButton.styleFrom(
-                                    backgroundColor:
-                                        Theme.of(context).primaryColor,
+                                    backgroundColor: Theme.of(context).primaryColor,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(8),
                                     ),
@@ -1013,15 +930,12 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
                                         ),
                                       );
                                     } else {
-                                      context
-                                          .read<BattleRoomCubit>()
-                                          .startGame();
+                                      context.read<BattleRoomCubit>().startGame();
                                       await Future<void>.delayed(
                                         const Duration(milliseconds: 500),
                                       );
                                       //navigate to quiz screen
-                                      await Navigator.of(context)
-                                          .pushReplacementNamed(
+                                      await Navigator.of(context).pushReplacementNamed(
                                         Routes.battleRoomQuiz,
                                         arguments: {
                                           'quiz_type': QuizTypes.oneVsOneBattle,
@@ -1034,26 +948,20 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
                                     context.tr('startLbl')!,
                                     style: TextStyle(
                                       fontSize: 18,
-                                      color:
-                                          Theme.of(context).colorScheme.surface,
+                                      color: Theme.of(context).colorScheme.surface,
                                     ),
                                   ),
                                 ),
                               );
                             }
                             if (state is BattleRoomUserFound) {
-                              if (state.battleRoom.user1!.uid !=
-                                  context
-                                      .read<UserDetailsCubit>()
-                                      .getUserProfile()
-                                      .userId) {
+                              if (state.battleRoom.user1!.uid != context.read<UserDetailsCubit>().getUserProfile().userId) {
                                 return Container();
                               }
 
                               return Padding(
                                 padding: EdgeInsets.symmetric(
-                                  horizontal:
-                                      scrWidth * UiUtils.hzMarginPct + 10,
+                                  horizontal: scrWidth * UiUtils.hzMarginPct + 10,
                                 ),
                                 child: TextButton(
                                   onPressed: () async {
@@ -1069,15 +977,12 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
                                         ),
                                       );
                                     } else {
-                                      context
-                                          .read<BattleRoomCubit>()
-                                          .startGame();
+                                      context.read<BattleRoomCubit>().startGame();
                                       await Future<void>.delayed(
                                         const Duration(milliseconds: 500),
                                       );
                                       //navigate to quiz screen
-                                      await Navigator.of(context)
-                                          .pushReplacementNamed(
+                                      await Navigator.of(context).pushReplacementNamed(
                                         Routes.battleRoomQuiz,
                                         arguments: {
                                           'quiz_type': QuizTypes.oneVsOneBattle,
@@ -1087,8 +992,7 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
                                     }
                                   },
                                   style: TextButton.styleFrom(
-                                    backgroundColor:
-                                        Theme.of(context).primaryColor,
+                                    backgroundColor: Theme.of(context).primaryColor,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(8),
                                     ),
@@ -1097,8 +1001,7 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
                                     context.tr('startLbl')!,
                                     style: TextStyle(
                                       fontSize: 18,
-                                      color:
-                                          Theme.of(context).colorScheme.surface,
+                                      color: Theme.of(context).colorScheme.surface,
                                     ),
                                   ),
                                 ),
@@ -1116,30 +1019,20 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
             },
           );
         } else {
-          return BlocConsumer<MultiUserBattleRoomCubit,
-              MultiUserBattleRoomState>(
+          return BlocConsumer<MultiUserBattleRoomCubit, MultiUserBattleRoomState>(
             listener: (context, state) {
               if (state is MultiUserBattleRoomSuccess) {
                 //if game is ready to play
                 if (state.battleRoom.readyToPlay!) {
                   //if user has joined room then navigate to quiz screen
-                  if (state.battleRoom.user1!.uid !=
-                      context
-                          .read<UserDetailsCubit>()
-                          .getUserProfile()
-                          .userId) {
-                    Navigator.of(context)
-                        .pushReplacementNamed(Routes.multiUserBattleRoomQuiz);
+                  if (state.battleRoom.user1!.uid != context.read<UserDetailsCubit>().getUserProfile().userId) {
+                    Navigator.of(context).pushReplacementNamed(Routes.multiUserBattleRoomQuiz);
                   }
                 }
 
                 //if owner deleted the room then show this dialog
                 if (!state.isRoomExist) {
-                  if (context
-                          .read<UserDetailsCubit>()
-                          .getUserProfile()
-                          .userId !=
-                      state.battleRoom.user1!.uid) {
+                  if (context.read<UserDetailsCubit>().getUserProfile().userId != state.battleRoom.user1!.uid) {
                     //Room destroyed by owner
                     showRoomDestroyed(context);
                   }
@@ -1168,8 +1061,7 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               PopScope(
-                                canPop:
-                                    battleState is! MultiUserBattleRoomSuccess,
+                                canPop: battleState is! MultiUserBattleRoomSuccess,
                                 onPopInvokedWithResult: (didPop, _) {
                                   if (didPop) return;
 
@@ -1180,9 +1072,7 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
                                   child: Icon(
                                     Icons.arrow_back_rounded,
                                     size: 24,
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onTertiary,
+                                    color: Theme.of(context).colorScheme.onTertiary,
                                   ),
                                 ),
                               ),
@@ -1199,22 +1089,14 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
                                   return InkWell(
                                     onTap: () => _shareRoomCode(
                                       context: context,
-                                      roomCode: context
-                                          .read<MultiUserBattleRoomCubit>()
-                                          .getRoomCode(),
-                                      categoryName: context
-                                          .read<MultiUserBattleRoomCubit>()
-                                          .categoryName,
-                                      entryFee: context
-                                          .read<MultiUserBattleRoomCubit>()
-                                          .getEntryFee(),
+                                      roomCode: context.read<MultiUserBattleRoomCubit>().getRoomCode(),
+                                      categoryName: context.read<MultiUserBattleRoomCubit>().categoryName,
+                                      entryFee: context.read<MultiUserBattleRoomCubit>().getEntryFee(),
                                     ),
                                     child: Icon(
                                       Icons.share,
                                       size: 20,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onTertiary,
+                                      color: Theme.of(context).colorScheme.onTertiary,
                                     ),
                                   );
                                 },
@@ -1227,27 +1109,16 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
 
                         /// Invite Code
                         BattleInviteCard(
-                          categoryImage: context
-                              .read<MultiUserBattleRoomCubit>()
-                              .categoryImage,
-                          categoryName: context
-                              .read<MultiUserBattleRoomCubit>()
-                              .categoryName,
-                          entryFee: context
-                              .read<MultiUserBattleRoomCubit>()
-                              .getEntryFee(),
-                          roomCode: context
-                              .read<MultiUserBattleRoomCubit>()
-                              .getRoomCode(),
+                          categoryImage: context.read<MultiUserBattleRoomCubit>().categoryImage,
+                          categoryName: context.read<MultiUserBattleRoomCubit>().categoryName,
+                          entryFee: context.read<MultiUserBattleRoomCubit>().getEntryFee(),
+                          roomCode: context.read<MultiUserBattleRoomCubit>().getRoomCode(),
                           shareText: context.tr('shareRoomCodeLbl')!,
-                          categoryEnabled: context
-                              .read<SystemConfigCubit>()
-                              .isCategoryEnabledForGroupBattle,
+                          categoryEnabled: context.read<SystemConfigCubit>().isCategoryEnabledForGroupBattle,
                         ),
                         const SizedBox(height: 20),
                         Expanded(
-                          child: BlocBuilder<MultiUserBattleRoomCubit,
-                              MultiUserBattleRoomState>(
+                          child: BlocBuilder<MultiUserBattleRoomCubit, MultiUserBattleRoomState>(
                             builder: (_, state) {
                               if (state is MultiUserBattleRoomSuccess) {
                                 return GridView.count(
@@ -1264,23 +1135,17 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
                                       isCreator: true,
                                     ),
                                     inviteRoomUserCard(
-                                      state.battleRoom.user2!.name.isEmpty
-                                          ? context.tr('player2')!
-                                          : state.battleRoom.user2!.name,
+                                      state.battleRoom.user2!.name.isEmpty ? context.tr('player2')! : state.battleRoom.user2!.name,
                                       state.battleRoom.user2!.profileUrl,
                                       isCreator: false,
                                     ),
                                     inviteRoomUserCard(
-                                      state.battleRoom.user3!.name.isEmpty
-                                          ? context.tr('player3')!
-                                          : state.battleRoom.user3!.name,
+                                      state.battleRoom.user3!.name.isEmpty ? context.tr('player3')! : state.battleRoom.user3!.name,
                                       state.battleRoom.user3!.profileUrl,
                                       isCreator: false,
                                     ),
                                     inviteRoomUserCard(
-                                      state.battleRoom.user4!.name.isEmpty
-                                          ? context.tr('player4')!
-                                          : state.battleRoom.user4!.name,
+                                      state.battleRoom.user4!.name.isEmpty ? context.tr('player4')! : state.battleRoom.user4!.name,
                                       state.battleRoom.user4!.profileUrl,
                                       isCreator: false,
                                     ),
@@ -1294,21 +1159,15 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
                         const SizedBox(height: 20),
 
                         /// Start
-                        BlocBuilder<MultiUserBattleRoomCubit,
-                            MultiUserBattleRoomState>(
+                        BlocBuilder<MultiUserBattleRoomCubit, MultiUserBattleRoomState>(
                           builder: (context, state) {
                             if (state is MultiUserBattleRoomSuccess) {
-                              if (state.battleRoom.user1!.uid !=
-                                  context
-                                      .read<UserDetailsCubit>()
-                                      .getUserProfile()
-                                      .userId) {
+                              if (state.battleRoom.user1!.uid != context.read<UserDetailsCubit>().getUserProfile().userId) {
                                 return Container();
                               }
                               return Padding(
                                 padding: EdgeInsets.symmetric(
-                                  horizontal:
-                                      scrWidth * UiUtils.hzMarginPct + 10,
+                                  horizontal: scrWidth * UiUtils.hzMarginPct + 10,
                                 ),
                                 child: TextButton(
                                   onPressed: () {
@@ -1325,30 +1184,23 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
                                       );
                                     } else {
                                       //start quiz
-                                      /*    widget.quizType==QuizTypes.battle?context.read<BattleRoomCubit>().startGame():*/ context
-                                          .read<MultiUserBattleRoomCubit>()
-                                          .startGame();
+                                      /*    widget.quizType==QuizTypes.battle?context.read<BattleRoomCubit>().startGame():*/ context.read<MultiUserBattleRoomCubit>().startGame();
                                       //navigate to quiz screen
-                                      widget.quizType ==
-                                              QuizTypes.oneVsOneBattle
-                                          ? Navigator.of(context)
-                                              .pushReplacementNamed(
+                                      widget.quizType == QuizTypes.oneVsOneBattle
+                                          ? Navigator.of(context).pushReplacementNamed(
                                               Routes.battleRoomQuiz,
                                               arguments: {
-                                                'quiz_type':
-                                                    QuizTypes.oneVsOneBattle,
+                                                'quiz_type': QuizTypes.oneVsOneBattle,
                                                 'play_with_bot': false,
                                               },
                                             )
-                                          : Navigator.of(context)
-                                              .pushReplacementNamed(
+                                          : Navigator.of(context).pushReplacementNamed(
                                               Routes.multiUserBattleRoomQuiz,
                                             );
                                     }
                                   },
                                   style: TextButton.styleFrom(
-                                    backgroundColor:
-                                        Theme.of(context).primaryColor,
+                                    backgroundColor: Theme.of(context).primaryColor,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(8),
                                     ),
@@ -1357,8 +1209,7 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
                                     context.tr('startLbl')!,
                                     style: TextStyle(
                                       fontSize: 18,
-                                      color:
-                                          Theme.of(context).colorScheme.surface,
+                                      color: Theme.of(context).colorScheme.surface,
                                     ),
                                   ),
                                 ),
@@ -1390,15 +1241,9 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
         final battleCubit = context.read<BattleRoomCubit>();
 
         if (battleCubit.state is BattleRoomUserFound) {
-          isCreator = (battleCubit.state as BattleRoomUserFound)
-                  .battleRoom
-                  .user1!
-                  .uid ==
-              userId;
+          isCreator = (battleCubit.state as BattleRoomUserFound).battleRoom.user1!.uid == userId;
         } else {
-          isCreator =
-              (battleCubit.state as BattleRoomCreated).battleRoom.user1!.uid ==
-                  userId;
+          isCreator = (battleCubit.state as BattleRoomCreated).battleRoom.user1!.uid == userId;
         }
 
         if (isCreator) {
@@ -1409,11 +1254,7 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
       } else {
         final multiUserCubit = context.read<MultiUserBattleRoomCubit>();
 
-        final isCreator = (multiUserCubit.state as MultiUserBattleRoomSuccess)
-                .battleRoom
-                .user1!
-                .uid ==
-            userId;
+        final isCreator = (multiUserCubit.state as MultiUserBattleRoomSuccess).battleRoom.user1!.uid == userId;
 
         if (isCreator) {
           multiUserCubit.deleteMultiUserBattleRoom();
@@ -1514,10 +1355,7 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
               style: TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeights.regular,
-                color: Theme.of(context)
-                    .colorScheme
-                    .onTertiary
-                    .withValues(alpha: 0.3),
+                color: Theme.of(context).colorScheme.onTertiary.withValues(alpha: 0.3),
               ),
             ),
         ],
@@ -1554,9 +1392,7 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
         height: 86,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
-          color: entryFee == coins
-              ? Theme.of(context).primaryColor
-              : Theme.of(context).colorScheme.surface,
+          color: entryFee == coins ? Theme.of(context).primaryColor : Theme.of(context).colorScheme.surface,
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -1570,9 +1406,7 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeights.regular,
-                    color: entryFee == coins
-                        ? Theme.of(context).colorScheme.surface
-                        : Theme.of(context).colorScheme.onTertiary,
+                    color: entryFee == coins ? Theme.of(context).colorScheme.surface : Theme.of(context).colorScheme.onTertiary,
                   ),
                 ),
               ),
@@ -1592,12 +1426,8 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
   void showJoinRoomBottomSheet() {
     final joinRoomCode = TextEditingController(text: '');
     // Reset Battle State to Initial.
-    context
-        .read<MultiUserBattleRoomCubit>()
-        .updateState(MultiUserBattleRoomInitial(), cancelSubscription: true);
-    context
-        .read<BattleRoomCubit>()
-        .updateState(BattleRoomInitial(), cancelSubscription: true);
+    context.read<MultiUserBattleRoomCubit>().updateState(MultiUserBattleRoomInitial(), cancelSubscription: true);
+    context.read<BattleRoomCubit>().updateState(BattleRoomInitial(), cancelSubscription: true);
 
     showModalBottomSheet<bool?>(
       isDismissible: false,
@@ -1672,26 +1502,19 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
                 child: PinCodeTextField(
                   appContext: context,
                   length: 6,
-                  keyboardType: roomCodeCharType == RoomCodeCharType.onlyNumbers
-                      ? TextInputType.number
-                      : TextInputType.text,
+                  keyboardType: roomCodeCharType == RoomCodeCharType.onlyNumbers ? TextInputType.number : TextInputType.text,
                   textStyle: TextStyle(color: colorScheme.onTertiary),
                   pinTheme: PinTheme(
-                    selectedFillColor:
-                        colorScheme.onTertiary.withValues(alpha: 0.1),
-                    inactiveColor:
-                        colorScheme.onTertiary.withValues(alpha: 0.1),
+                    selectedFillColor: colorScheme.onTertiary.withValues(alpha: 0.1),
+                    inactiveColor: colorScheme.onTertiary.withValues(alpha: 0.1),
                     activeColor: colorScheme.onTertiary.withValues(alpha: 0.1),
-                    inactiveFillColor:
-                        colorScheme.onTertiary.withValues(alpha: 0.1),
-                    selectedColor:
-                        Theme.of(context).primaryColor.withValues(alpha: 0.5),
+                    inactiveFillColor: colorScheme.onTertiary.withValues(alpha: 0.1),
+                    selectedColor: Theme.of(context).primaryColor.withValues(alpha: 0.5),
                     shape: PinCodeFieldShape.box,
                     borderRadius: BorderRadius.circular(8),
                     fieldHeight: 45,
                     fieldWidth: 45,
-                    activeFillColor:
-                        colorScheme.onTertiary.withValues(alpha: 0.2),
+                    activeFillColor: colorScheme.onTertiary.withValues(alpha: 0.2),
                   ),
                   cursorColor: colorScheme.onTertiary,
                   animationDuration: const Duration(milliseconds: 200),
@@ -1712,8 +1535,7 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
                         context.shouldPop();
                         inviteToRoomBottomSheet();
                       } else if (state is BattleRoomFailure) {
-                        if (state.errorMessageCode ==
-                            errorCodeUnauthorizedAccess) {
+                        if (state.errorMessageCode == errorCodeUnauthorizedAccess) {
                           showAlreadyLoggedInDialog(context);
                           return;
                         }
@@ -1749,8 +1571,7 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
                             return;
                           }
 
-                          final user =
-                              context.read<UserDetailsCubit>().getUserProfile();
+                          final user = context.read<UserDetailsCubit>().getUserProfile();
 
                           context.read<BattleRoomCubit>().joinRoom(
                                 currentCoin: user.coins!,
@@ -1768,15 +1589,13 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
               else
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 30),
-                  child: BlocConsumer<MultiUserBattleRoomCubit,
-                      MultiUserBattleRoomState>(
+                  child: BlocConsumer<MultiUserBattleRoomCubit, MultiUserBattleRoomState>(
                     listener: (context, state) {
                       if (state is MultiUserBattleRoomSuccess) {
                         context.shouldPop();
                         inviteToRoomBottomSheet();
                       } else if (state is MultiUserBattleRoomFailure) {
-                        if (state.errorMessageCode ==
-                            errorCodeUnauthorizedAccess) {
+                        if (state.errorMessageCode == errorCodeUnauthorizedAccess) {
                           showAlreadyLoggedInDialog(context);
                           return;
                         }
@@ -1813,8 +1632,7 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
                             return;
                           }
 
-                          final user =
-                              context.read<UserDetailsCubit>().getUserProfile();
+                          final user = context.read<UserDetailsCubit>().getUserProfile();
 
                           context.read<MultiUserBattleRoomCubit>().joinRoom(
                                 currentCoin: user.coins!,
@@ -1849,8 +1667,7 @@ class _CreateOrJoinRoomScreenState extends State<CreateOrJoinRoomScreen> {
         Navigator.pop(context);
       }
     } else {
-      if (context.read<MultiUserBattleRoomCubit>().state
-          is! MultiUserBattleRoomInProgress) {
+      if (context.read<MultiUserBattleRoomCubit>().state is! MultiUserBattleRoomInProgress) {
         Navigator.pop(context);
       }
     }
