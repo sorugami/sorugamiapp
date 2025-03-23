@@ -319,6 +319,11 @@ class _ResultScreenState extends State<ResultScreen> {
                   userId2: widget.battleRoom!.user1!.uid != currentUserId ? widget.battleRoom!.user1!.uid : widget.battleRoom!.user2!.uid,
                   winnerId: _winnerId!,
                 );
+          } else {
+            context.read<UpdateScoreAndCoinsCubit>().updateScore(
+                  currentUser.points,
+                );
+            context.read<UserDetailsCubit>().updateScore(currentUser.points);
           }
         } else {
           //if user is not winner then update only score
