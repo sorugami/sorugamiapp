@@ -71,20 +71,15 @@ class ResultScreen extends StatefulWidget {
     this.subcategoryId,
   });
 
-  final QuizTypes?
-      quizType; //to show different kind of result data for different quiz type
-  final int?
-      numberOfPlayer; //to show different kind of result data for number of player
-  final int?
-      myPoints; // will be in use when quiz is not type of battle and live battle
+  final QuizTypes? quizType; //to show different kind of result data for different quiz type
+  final int? numberOfPlayer; //to show different kind of result data for number of player
+  final int? myPoints; // will be in use when quiz is not type of battle and live battle
   final List<Question>? questions; //to see review answers
   final BattleRoom? battleRoom; //will be in use for battle
-  final bool
-      playWithBot; // used for random battle with robot, users doesn't get any coins or score for playing with bot.
+  final bool playWithBot; // used for random battle with robot, users doesn't get any coins or score for playing with bot.
   final String? contestId;
   final Comprehension comprehension; //
-  final List<GuessTheWordQuestion>?
-      guessTheWordQuestions; //questions when quiz type is guessTheWord
+  final List<GuessTheWordQuestion>? guessTheWordQuestions; //questions when quiz type is guessTheWord
   final int? entryFee;
 
   //if quizType is quizZone then it will be in use
@@ -136,8 +131,7 @@ class ResultScreen extends StatefulWidget {
           ),
           //to update user score and coins
           BlocProvider<UpdateScoreAndCoinsCubit>(
-            create: (_) =>
-                UpdateScoreAndCoinsCubit(ProfileManagementRepository()),
+            create: (_) => UpdateScoreAndCoinsCubit(ProfileManagementRepository()),
           ),
           //to update statistic
           BlocProvider<UpdateStatisticCubit>(
@@ -158,15 +152,13 @@ class ResultScreen extends StatefulWidget {
         child: ResultScreen(
           battleRoom: args['battleRoom'] as BattleRoom?,
           categoryId: args['categoryId'] as String? ?? '',
-          comprehension:
-              args['comprehension'] as Comprehension? ?? Comprehension.empty(),
+          comprehension: args['comprehension'] as Comprehension? ?? Comprehension.empty(),
           contestId: args['contestId'] as String?,
           correctExamAnswers: args['correctExamAnswers'] as int?,
           entryFee: args['entryFee'] as int?,
           exam: args['exam'] as Exam?,
           examCompletedInMinutes: args['examCompletedInMinutes'] as int?,
-          guessTheWordQuestions:
-              args['guessTheWordQuestions'] as List<GuessTheWordQuestion>?,
+          guessTheWordQuestions: args['guessTheWordQuestions'] as List<GuessTheWordQuestion>?,
           hasUsedAnyLifeline: args['hasUsedAnyLifeline'] as bool?,
           incorrectExamAnswers: args['incorrectExamAnswers'] as int?,
           isPlayed: args['isPlayed'] as bool? ?? true,
@@ -200,8 +192,7 @@ class _ResultScreenState extends State<ResultScreen> {
 
   bool _displayedAlreadyLoggedInDialog = false;
 
-  late final didSkipQue = widget.quizType == QuizTypes.quizZone &&
-      widget.questions!.map((e) => e.submittedAnswerId).contains('0');
+  late final didSkipQue = widget.quizType == QuizTypes.quizZone && widget.questions!.map((e) => e.submittedAnswerId).contains('0');
 
   @override
   void initState() {
@@ -217,8 +208,7 @@ class _ResultScreenState extends State<ResultScreen> {
       userName = '';
     } else {
       //decide winner
-      if (winPercentage() >=
-          context.read<SystemConfigCubit>().quizWinningPercentage) {
+      if (winPercentage() >= context.read<SystemConfigCubit>().quizWinningPercentage) {
         _isWinner = true;
       } else {
         _isWinner = false;
@@ -256,8 +246,7 @@ class _ResultScreenState extends State<ResultScreen> {
   }
 
   void _updateStatistics() {
-    if (widget.quizType != QuizTypes.selfChallenge &&
-        widget.quizType != QuizTypes.exam) {
+    if (widget.quizType != QuizTypes.selfChallenge && widget.quizType != QuizTypes.exam) {
       context.read<UpdateStatisticCubit>().updateStatistic(
             answeredQuestion: attemptedQuestion(),
             categoryId: getCategoryIdOfQuestion(),
@@ -305,34 +294,32 @@ class _ResultScreenState extends State<ResultScreen> {
       () {
         //
         final currentUserId = context.read<UserDetailsCubit>().userId();
-        final currentUser = widget.battleRoom!.user1!.uid == currentUserId
-            ? widget.battleRoom!.user1!
-            : widget.battleRoom!.user2!;
+        final currentUser = widget.battleRoom!.user1!.uid == currentUserId ? widget.battleRoom!.user1! : widget.battleRoom!.user2!;
+        final giveCoins = widget.quizType != QuizTypes.oneVsOneBattle;
+
         if (_isWinner) {
-          //update score and coins for user
-          context.read<UpdateScoreAndCoinsCubit>().updateCoinsAndScore(
-                currentUser.points,
-                earnedCoins,
-                wonBattleKey,
-              );
-          //update score locally and database
-          context.read<UserDetailsCubit>().updateCoins(
-                addCoin: true,
-                coins: earnedCoins,
-              );
-          context.read<UserDetailsCubit>().updateScore(currentUser.points);
+          if (giveCoins) {
+            //update score and coins for user
+            context.read<UpdateScoreAndCoinsCubit>().updateCoinsAndScore(
+                  currentUser.points,
+                  earnedCoins,
+                  wonBattleKey,
+                );
+            //update score locally and database
+            context.read<UserDetailsCubit>().updateCoins(
+                  addCoin: true,
+                  coins: earnedCoins,
+                );
+            context.read<UserDetailsCubit>().updateScore(currentUser.points);
 
-          //update battle stats
+            //update battle stats
 
-          context.read<UpdateStatisticCubit>().updateBattleStatistic(
-                userId1: currentUserId == widget.battleRoom!.user1!.uid
-                    ? widget.battleRoom!.user1!.uid
-                    : widget.battleRoom!.user2!.uid,
-                userId2: widget.battleRoom!.user1!.uid != currentUserId
-                    ? widget.battleRoom!.user1!.uid
-                    : widget.battleRoom!.user2!.uid,
-                winnerId: _winnerId!,
-              );
+            context.read<UpdateStatisticCubit>().updateBattleStatistic(
+                  userId1: currentUserId == widget.battleRoom!.user1!.uid ? widget.battleRoom!.user1!.uid : widget.battleRoom!.user2!.uid,
+                  userId2: widget.battleRoom!.user1!.uid != currentUserId ? widget.battleRoom!.user1!.uid : widget.battleRoom!.user2!.uid,
+                  winnerId: _winnerId!,
+                );
+          }
         } else {
           //if user is not winner then update only score
           context.read<UpdateScoreAndCoinsCubit>().updateScore(
@@ -348,22 +335,16 @@ class _ResultScreenState extends State<ResultScreen> {
     final userId = context.read<UserDetailsCubit>().userId();
     final badgesCubit = context.read<BadgesCubit>();
     final config = context.read<SystemConfigCubit>();
-    final quickestCorrectAnswerExtraScore =
-        config.oneVsOneBattleQuickestCorrectAnswerExtraScore;
-    final correctAnswerScore =
-        config.quizCorrectAnswerCreditScore(QuizTypes.oneVsOneBattle);
+    final quickestCorrectAnswerExtraScore = config.oneVsOneBattleQuickestCorrectAnswerExtraScore;
+    final correctAnswerScore = config.quizCorrectAnswerCreditScore(QuizTypes.oneVsOneBattle);
 
     if (widget.quizType == QuizTypes.oneVsOneBattle) {
       //if badges is locked
       if (badgesCubit.isBadgeLocked('ultimate_player')) {
-        final badgeEarnPoints =
-            (correctAnswerScore + quickestCorrectAnswerExtraScore) *
-                totalQuestions();
+        final badgeEarnPoints = (correctAnswerScore + quickestCorrectAnswerExtraScore) * totalQuestions();
 
         //if user's points is same as highest points
-        final currentUser = widget.battleRoom!.user1!.uid == userId
-            ? widget.battleRoom!.user1!
-            : widget.battleRoom!.user2!;
+        final currentUser = widget.battleRoom!.user1!.uid == userId ? widget.battleRoom!.user1! : widget.battleRoom!.user2!;
         if (currentUser.points == badgeEarnPoints) {
           badgesCubit.setBadge(badgeType: 'ultimate_player');
         }
@@ -377,17 +358,13 @@ class _ResultScreenState extends State<ResultScreen> {
 
       //funAndLearn is related to flashback
       if (badgesCubit.isBadgeLocked('flashback')) {
-        final funNLearnQuestionMinimumTimeForBadge =
-            badgesCubit.getBadgeCounterByType('flashback');
+        final funNLearnQuestionMinimumTimeForBadge = badgesCubit.getBadgeCounterByType('flashback');
         //if badges not loaded some how
         if (funNLearnQuestionMinimumTimeForBadge == -1) {
           return;
         }
-        final badgeEarnTimeInSeconds =
-            totalQuestions() * funNLearnQuestionMinimumTimeForBadge;
-        if (correctAnswer() == totalQuestions() &&
-            widget.timeTakenToCompleteQuiz! <=
-                badgeEarnTimeInSeconds.toDouble()) {
+        final badgeEarnTimeInSeconds = totalQuestions() * funNLearnQuestionMinimumTimeForBadge;
+        if (correctAnswer() == totalQuestions() && widget.timeTakenToCompleteQuiz! <= badgeEarnTimeInSeconds.toDouble()) {
           badgesCubit.setBadge(badgeType: 'flashback');
         }
       }
@@ -403,8 +380,7 @@ class _ResultScreenState extends State<ResultScreen> {
       }
 
       if (badgesCubit.isBadgeLocked('brainiac')) {
-        if (correctAnswer() == totalQuestions() &&
-            !widget.hasUsedAnyLifeline!) {
+        if (correctAnswer() == totalQuestions() && !widget.hasUsedAnyLifeline!) {
           badgesCubit.setBadge(badgeType: 'brainiac');
         }
       }
@@ -415,8 +391,7 @@ class _ResultScreenState extends State<ResultScreen> {
       }
 
       if (badgesCubit.isBadgeLocked('super_sonic')) {
-        final guessTheWordQuestionMinimumTimeForBadge =
-            badgesCubit.getBadgeCounterByType('super_sonic');
+        final guessTheWordQuestionMinimumTimeForBadge = badgesCubit.getBadgeCounterByType('super_sonic');
 
         //if badges not loaded some how
         if (guessTheWordQuestionMinimumTimeForBadge == -1) {
@@ -424,11 +399,8 @@ class _ResultScreenState extends State<ResultScreen> {
         }
 
         //if user has solved the quiz with in badgeEarnTime then they can earn badge
-        final badgeEarnTimeInSeconds =
-            totalQuestions() * guessTheWordQuestionMinimumTimeForBadge;
-        if (correctAnswer() == totalQuestions() &&
-            widget.timeTakenToCompleteQuiz! <=
-                badgeEarnTimeInSeconds.toDouble()) {
+        final badgeEarnTimeInSeconds = totalQuestions() * guessTheWordQuestionMinimumTimeForBadge;
+        if (correctAnswer() == totalQuestions() && widget.timeTakenToCompleteQuiz! <= badgeEarnTimeInSeconds.toDouble()) {
           badgesCubit.setBadge(badgeType: 'super_sonic');
         }
       }
@@ -519,15 +491,12 @@ class _ResultScreenState extends State<ResultScreen> {
         }
       }
       //
-      else if (widget.quizType == QuizTypes.funAndLearn &&
-          !widget.comprehension.isPlayed) {
+      else if (widget.quizType == QuizTypes.funAndLearn && !widget.comprehension.isPlayed) {
         _updateCoinsAndScore();
         context.read<SetCategoryPlayed>().setCategoryPlayed(
               quizType: QuizTypes.funAndLearn,
               categoryId: widget.questions!.first.categoryId!,
-              subcategoryId: widget.questions!.first.subcategoryId! == '0'
-                  ? ''
-                  : widget.questions!.first.subcategoryId!,
+              subcategoryId: widget.questions!.first.subcategoryId! == '0' ? '' : widget.questions!.first.subcategoryId!,
               typeId: widget.comprehension.id,
             );
       }
@@ -537,21 +506,15 @@ class _ResultScreenState extends State<ResultScreen> {
         context.read<SetCategoryPlayed>().setCategoryPlayed(
               quizType: QuizTypes.guessTheWord,
               categoryId: widget.guessTheWordQuestions!.first.category,
-              subcategoryId:
-                  widget.guessTheWordQuestions!.first.subcategory == '0'
-                      ? ''
-                      : widget.guessTheWordQuestions!.first.subcategory,
+              subcategoryId: widget.guessTheWordQuestions!.first.subcategory == '0' ? '' : widget.guessTheWordQuestions!.first.subcategory,
               typeId: '',
             );
-      } else if (widget.quizType == QuizTypes.audioQuestions &&
-          !widget.isPlayed) {
+      } else if (widget.quizType == QuizTypes.audioQuestions && !widget.isPlayed) {
         _updateCoinsAndScore();
         context.read<SetCategoryPlayed>().setCategoryPlayed(
               quizType: QuizTypes.audioQuestions,
               categoryId: widget.questions!.first.categoryId!,
-              subcategoryId: widget.questions!.first.subcategoryId! == '0'
-                  ? ''
-                  : widget.questions!.first.subcategoryId!,
+              subcategoryId: widget.questions!.first.subcategoryId! == '0' ? '' : widget.questions!.first.subcategoryId!,
               typeId: '',
             );
       } else if (widget.quizType == QuizTypes.mathMania && !widget.isPlayed) {
@@ -559,9 +522,7 @@ class _ResultScreenState extends State<ResultScreen> {
         context.read<SetCategoryPlayed>().setCategoryPlayed(
               quizType: QuizTypes.mathMania,
               categoryId: widget.questions!.first.categoryId!,
-              subcategoryId: widget.questions!.first.subcategoryId! == '0'
-                  ? ''
-                  : widget.questions!.first.subcategoryId!,
+              subcategoryId: widget.questions!.first.subcategoryId! == '0' ? '' : widget.questions!.first.subcategoryId!,
               typeId: '',
             );
       } else if (widget.quizType == QuizTypes.trueAndFalse && widget.isPlayed) {
@@ -582,12 +543,10 @@ class _ResultScreenState extends State<ResultScreen> {
     if (_isWinner) {
       final percentage = winPercentage();
       _earnedCoins = UiUtils.coinsBasedOnWinPercentage(
-        guessTheWordMaxWinningCoins:
-            context.read<SystemConfigCubit>().guessTheWordMaxWinningCoins,
+        guessTheWordMaxWinningCoins: context.read<SystemConfigCubit>().guessTheWordMaxWinningCoins,
         percentage: percentage,
         quizType: widget.quizType!,
-        maxCoinsWinningPercentage:
-            context.read<SystemConfigCubit>().maxCoinsWinningPercentage,
+        maxCoinsWinningPercentage: context.read<SystemConfigCubit>().maxCoinsWinningPercentage,
         maxWinningCoins: context.read<SystemConfigCubit>().maxWinningCoins,
       );
     }
@@ -596,21 +555,13 @@ class _ResultScreenState extends State<ResultScreen> {
   //This will execute once user press back button or go back from result screen
   //so respective data of category,sub category and fun n learn can be updated
   void onPageBackCalls() {
-    if (widget.quizType == QuizTypes.funAndLearn &&
-        _isWinner &&
-        !widget.comprehension.isPlayed) {
+    if (widget.quizType == QuizTypes.funAndLearn && _isWinner && !widget.comprehension.isPlayed) {
       context.read<ComprehensionCubit>().getComprehension(
             languageId: UiUtils.getCurrentQuizLanguageId(context),
-            type: widget.questions!.first.subcategoryId! == '0'
-                ? 'category'
-                : 'subcategory',
-            typeId: widget.questions!.first.subcategoryId! == '0'
-                ? widget.questions!.first.categoryId!
-                : widget.questions!.first.subcategoryId!,
+            type: widget.questions!.first.subcategoryId! == '0' ? 'category' : 'subcategory',
+            typeId: widget.questions!.first.subcategoryId! == '0' ? widget.questions!.first.categoryId! : widget.questions!.first.subcategoryId!,
           );
-    } else if (widget.quizType == QuizTypes.audioQuestions &&
-        _isWinner &&
-        !widget.isPlayed) {
+    } else if (widget.quizType == QuizTypes.audioQuestions && _isWinner && !widget.isPlayed) {
       //
       if (widget.questions!.first.subcategoryId == '0') {
         //update category
@@ -626,9 +577,7 @@ class _ResultScreenState extends State<ResultScreen> {
               widget.questions!.first.categoryId!,
             );
       }
-    } else if (widget.quizType == QuizTypes.guessTheWord &&
-        _isWinner &&
-        !widget.isPlayed) {
+    } else if (widget.quizType == QuizTypes.guessTheWord && _isWinner && !widget.isPlayed) {
       if (widget.guessTheWordQuestions!.first.subcategory == '0') {
         //update category
         context.read<QuizCategoryCubit>().getQuizCategoryWithUserId(
@@ -643,9 +592,7 @@ class _ResultScreenState extends State<ResultScreen> {
               widget.guessTheWordQuestions!.first.category,
             );
       }
-    } else if (widget.quizType == QuizTypes.mathMania &&
-        _isWinner &&
-        !widget.isPlayed) {
+    } else if (widget.quizType == QuizTypes.mathMania && _isWinner && !widget.isPlayed) {
       if (widget.questions!.first.subcategoryId == '0') {
         //update category
         context.read<QuizCategoryCubit>().getQuizCategoryWithUserId(
@@ -675,16 +622,12 @@ class _ResultScreenState extends State<ResultScreen> {
 
   String getCategoryIdOfQuestion() {
     if (widget.quizType == QuizTypes.oneVsOneBattle) {
-      return widget.battleRoom!.categoryId!.isEmpty
-          ? '0'
-          : widget.battleRoom!.categoryId!;
+      return widget.battleRoom!.categoryId!.isEmpty ? '0' : widget.battleRoom!.categoryId!;
     }
     if (widget.quizType == QuizTypes.guessTheWord) {
       return widget.guessTheWordQuestions!.first.category;
     }
-    return widget.questions!.first.categoryId!.isEmpty
-        ? '-'
-        : widget.questions!.first.categoryId!;
+    return widget.questions!.first.categoryId!.isEmpty ? '-' : widget.questions!.first.categoryId!;
   }
 
   int correctAnswer() {
@@ -694,8 +637,7 @@ class _ResultScreenState extends State<ResultScreen> {
     var correctAnswer = 0;
     if (widget.quizType == QuizTypes.guessTheWord) {
       for (final question in widget.guessTheWordQuestions!) {
-        if (question.answer ==
-            UiUtils.buildGuessTheWordQuestionAnswer(question.submittedAnswer)) {
+        if (question.answer == UiUtils.buildGuessTheWordQuestionAnswer(question.submittedAnswer)) {
           correctAnswer++;
         }
       }
@@ -740,24 +682,23 @@ class _ResultScreenState extends State<ResultScreen> {
     if (widget.quizType == QuizTypes.oneVsOneBattle) return 0;
 
     if (widget.quizType == QuizTypes.exam) {
-      return (widget.obtainedMarks! * 100.0) /
-          int.parse(widget.exam!.totalMarks);
+      return (widget.obtainedMarks! * 100.0) / int.parse(widget.exam!.totalMarks);
     }
 
     return (correctAnswer() * 100.0) / totalQuestions();
   }
 
   bool showCoinsAndScore() {
-    if (widget.quizType == QuizTypes.selfChallenge ||
-        widget.quizType == QuizTypes.contest ||
-        widget.quizType == QuizTypes.exam ||
-        widget.quizType == QuizTypes.dailyQuiz) {
+    if (widget.quizType == QuizTypes.oneVsOneBattle) {
+      return false;
+    }
+
+    if (widget.quizType == QuizTypes.selfChallenge || widget.quizType == QuizTypes.contest || widget.quizType == QuizTypes.exam || widget.quizType == QuizTypes.dailyQuiz) {
       return false;
     }
 
     if (widget.quizType == QuizTypes.quizZone) {
-      return _isWinner &&
-          (int.parse(widget.questions!.first.level!) == widget.unlockedLevel);
+      return _isWinner && (int.parse(widget.questions!.first.level!) == widget.unlockedLevel);
     }
     if (widget.quizType == QuizTypes.funAndLearn) {
       //if user completed more than 30% and has not played this paragraph yet
@@ -853,8 +794,7 @@ class _ResultScreenState extends State<ResultScreen> {
                 textAlign: TextAlign.center,
                 style: titleStyle,
               ),
-              if (widget.quizType != QuizTypes.exam &&
-                  widget.quizType != QuizTypes.oneVsOneBattle) ...[
+              if (widget.quizType != QuizTypes.exam && widget.quizType != QuizTypes.oneVsOneBattle) ...[
                 Flexible(
                   child: Text(
                     " ${userName.split(' ').first}",
@@ -932,9 +872,7 @@ class _ResultScreenState extends State<ResultScreen> {
   }
 
   Widget _buildIndividualResultContainer(String userProfileUrl) {
-    final lottieAnimation = _isWinner
-        ? 'assets/animations/confetti.json'
-        : 'assets/animations/defeats.json';
+    final lottieAnimation = _isWinner ? 'assets/animations/confetti.json' : 'assets/animations/defeats.json';
 
     return Stack(
       clipBehavior: Clip.none,
@@ -953,8 +891,7 @@ class _ResultScreenState extends State<ResultScreen> {
               var verticalSpacePercentage = 0.0;
 
               var radialSizePercentage = 0.0;
-              if (constraints.maxHeight <
-                  UiUtils.profileHeightBreakPointResultScreen) {
+              if (constraints.maxHeight < UiUtils.profileHeightBreakPointResultScreen) {
                 verticalSpacePercentage = 0.015;
                 radialSizePercentage = 0.6;
               } else {
@@ -973,8 +910,7 @@ class _ResultScreenState extends State<ResultScreen> {
                       offset: const Offset(0, -20),
                       child: RadialPercentageResultContainer(
                         percentage: winPercentage(),
-                        timeTakenToCompleteQuizInSeconds:
-                            widget.examCompletedInMinutes,
+                        timeTakenToCompleteQuizInSeconds: widget.examCompletedInMinutes,
                         size: Size(
                           constraints.maxHeight * radialSizePercentage,
                           constraints.maxHeight * radialSizePercentage,
@@ -1024,9 +960,7 @@ class _ResultScreenState extends State<ResultScreen> {
         Align(
           alignment: AlignmentDirectional.bottomStart,
           child: _buildResultDataWithIconContainer(
-            widget.quizType == QuizTypes.exam
-                ? '${widget.incorrectExamAnswers}/${totalQuestions()}'
-                : '${totalQuestions() - correctAnswer()}/${totalQuestions()}',
+            widget.quizType == QuizTypes.exam ? '${widget.incorrectExamAnswers}/${totalQuestions()}' : '${totalQuestions() - correctAnswer()}/${totalQuestions()}',
             Assets.wrong,
             EdgeInsetsDirectional.only(
               start: 15,
@@ -1089,8 +1023,7 @@ class _ResultScreenState extends State<ResultScreen> {
             child: LayoutBuilder(
               builder: (context, constraints) {
                 var radialSizePercentage = 0.0;
-                if (constraints.maxHeight <
-                    UiUtils.profileHeightBreakPointResultScreen) {
+                if (constraints.maxHeight < UiUtils.profileHeightBreakPointResultScreen) {
                   radialSizePercentage = 0.4;
                 } else {
                   radialSizePercentage = 0.325;
@@ -1099,8 +1032,7 @@ class _ResultScreenState extends State<ResultScreen> {
                   offset: const Offset(0, 15),
                   child: RadialPercentageResultContainer(
                     percentage: winPercentage(),
-                    timeTakenToCompleteQuizInSeconds:
-                        widget.timeTakenToCompleteQuiz?.toInt(),
+                    timeTakenToCompleteQuizInSeconds: widget.timeTakenToCompleteQuiz?.toInt(),
                     size: Size(
                       constraints.maxHeight * radialSizePercentage,
                       constraints.maxHeight * radialSizePercentage,
@@ -1115,20 +1047,15 @@ class _ResultScreenState extends State<ResultScreen> {
   }
 
   Widget _buildBattleResultDetails() {
-    final winnerDetails = widget.battleRoom!.user1!.uid == _winnerId
-        ? widget.battleRoom!.user1
-        : widget.battleRoom!.user2;
-    final looserDetails = widget.battleRoom!.user1!.uid != _winnerId
-        ? widget.battleRoom!.user1
-        : widget.battleRoom!.user2;
+    final winnerDetails = widget.battleRoom!.user1!.uid == _winnerId ? widget.battleRoom!.user1 : widget.battleRoom!.user2;
+    final looserDetails = widget.battleRoom!.user1!.uid != _winnerId ? widget.battleRoom!.user1 : widget.battleRoom!.user2;
 
     return _winnerId == null
         ? const SizedBox()
         : LayoutBuilder(
             builder: (context, constraints) {
               var verticalSpacePercentage = 0.0;
-              if (constraints.maxHeight <
-                  UiUtils.profileHeightBreakPointResultScreen) {
+              if (constraints.maxHeight < UiUtils.profileHeightBreakPointResultScreen) {
                 verticalSpacePercentage = _winnerId!.isEmpty ? 0.035 : 0.03;
               } else {
                 verticalSpacePercentage = _winnerId!.isEmpty ? 0.075 : 0.05;
@@ -1136,71 +1063,64 @@ class _ResultScreenState extends State<ResultScreen> {
               return Column(
                 children: [
                   _buildGreetingMessage(),
-                  if (widget.entryFee! > 0)
-                    context.read<UserDetailsCubit>().userId() == _winnerId
-                        ? Padding(
-                            padding: const EdgeInsets.only(top: 20, bottom: 20),
-                            child: Container(
-                              padding: const EdgeInsets.only(
-                                top: 10,
-                                bottom: 10,
-                                right: 30,
-                                left: 30,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Theme.of(context)
-                                    .primaryColor
-                                    .withValues(alpha: 0.2),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Text(
-                                "${context.tr("youWin")!} ${widget.entryFee! * 2} ${context.tr("coinsLbl")!}",
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: Theme.of(context).primaryColor,
-                                ),
-                              ),
-                            ),
-                          )
-                        : _winnerId!.isEmpty
-                            ? const SizedBox()
-                            : Padding(
+                  if (widget.quizType != QuizTypes.oneVsOneBattle)
+                    if (widget.entryFee! > 0)
+                      context.read<UserDetailsCubit>().userId() == _winnerId
+                          ? Padding(
+                              padding: const EdgeInsets.only(top: 20, bottom: 20),
+                              child: Container(
                                 padding: const EdgeInsets.only(
-                                  top: 20,
-                                  bottom: 20,
+                                  top: 10,
+                                  bottom: 10,
+                                  right: 30,
+                                  left: 30,
                                 ),
-                                child: Container(
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).primaryColor.withValues(alpha: 0.2),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Text(
+                                  "${context.tr("youWin")!} ${widget.entryFee! * 2} ${context.tr("coinsLbl")!}",
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Theme.of(context).primaryColor,
+                                  ),
+                                ),
+                              ),
+                            )
+                          : _winnerId!.isEmpty
+                              ? const SizedBox()
+                              : Padding(
                                   padding: const EdgeInsets.only(
-                                    top: 10,
-                                    bottom: 10,
-                                    right: 30,
-                                    left: 30,
+                                    top: 20,
+                                    bottom: 20,
                                   ),
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onTertiary
-                                        .withValues(alpha: 0.2),
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Text(
-                                    "${context.tr("youLossLbl")!} ${widget.entryFee} ${context.tr("coinsLbl")!}",
-                                    style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onTertiary,
+                                  child: Container(
+                                    padding: const EdgeInsets.only(
+                                      top: 10,
+                                      bottom: 10,
+                                      right: 30,
+                                      left: 30,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(context).colorScheme.onTertiary.withValues(alpha: 0.2),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Text(
+                                      "${context.tr("youLossLbl")!} ${widget.entryFee} ${context.tr("coinsLbl")!}",
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                        color: Theme.of(context).colorScheme.onTertiary,
+                                      ),
                                     ),
                                   ),
-                                ),
-                              )
-                  else
-                    const SizedBox(height: 50),
+                                )
+                    else
+                      const SizedBox(height: 50),
                   SizedBox(
-                    height:
-                        constraints.maxHeight * verticalSpacePercentage - 10.2,
+                    height: constraints.maxHeight * verticalSpacePercentage - 10.2,
                   ),
                   if (_winnerId!.isEmpty)
                     Padding(
@@ -1218,8 +1138,7 @@ class _ResultScreenState extends State<ResultScreen> {
                                     QImage.circular(
                                       width: 80,
                                       height: 80,
-                                      imageUrl:
-                                          widget.battleRoom!.user1!.profileUrl,
+                                      imageUrl: widget.battleRoom!.user1!.profileUrl,
                                     ),
                                     Center(
                                       child: SvgPicture.asset(
@@ -1239,9 +1158,7 @@ class _ResultScreenState extends State<ResultScreen> {
                                   style: TextStyle(
                                     fontWeight: FontWeights.bold,
                                     fontSize: 16,
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onTertiary,
+                                    color: Theme.of(context).colorScheme.onTertiary,
                                   ),
                                 ),
                                 const SizedBox(height: 10),
@@ -1251,8 +1168,7 @@ class _ResultScreenState extends State<ResultScreen> {
                                     vertical: 8,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: Theme.of(context)
-                                        .scaffoldBackgroundColor,
+                                    color: Theme.of(context).scaffoldBackgroundColor,
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                   child: Text(
@@ -1260,9 +1176,7 @@ class _ResultScreenState extends State<ResultScreen> {
                                     style: TextStyle(
                                       fontWeight: FontWeights.bold,
                                       fontSize: 18,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onTertiary,
+                                      color: Theme.of(context).colorScheme.onTertiary,
                                     ),
                                   ),
                                 ),
@@ -1296,8 +1210,7 @@ class _ResultScreenState extends State<ResultScreen> {
                                     QImage.circular(
                                       width: 80,
                                       height: 80,
-                                      imageUrl:
-                                          widget.battleRoom!.user2!.profileUrl,
+                                      imageUrl: widget.battleRoom!.user2!.profileUrl,
                                     ),
                                     Center(
                                       child: SvgPicture.asset(
@@ -1317,9 +1230,7 @@ class _ResultScreenState extends State<ResultScreen> {
                                   style: TextStyle(
                                     fontWeight: FontWeights.bold,
                                     fontSize: 16,
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onTertiary,
+                                    color: Theme.of(context).colorScheme.onTertiary,
                                   ),
                                 ),
                                 const SizedBox(height: 10),
@@ -1329,8 +1240,7 @@ class _ResultScreenState extends State<ResultScreen> {
                                     vertical: 8,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: Theme.of(context)
-                                        .scaffoldBackgroundColor,
+                                    color: Theme.of(context).scaffoldBackgroundColor,
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                   child: Text(
@@ -1338,9 +1248,7 @@ class _ResultScreenState extends State<ResultScreen> {
                                     style: TextStyle(
                                       fontWeight: FontWeights.bold,
                                       fontSize: 18,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onTertiary,
+                                      color: Theme.of(context).colorScheme.onTertiary,
                                     ),
                                   ),
                                 ),
@@ -1385,9 +1293,7 @@ class _ResultScreenState extends State<ResultScreen> {
                                   style: TextStyle(
                                     fontWeight: FontWeights.bold,
                                     fontSize: 16,
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onTertiary,
+                                    color: Theme.of(context).colorScheme.onTertiary,
                                   ),
                                 ),
                                 const SizedBox(height: 10),
@@ -1397,8 +1303,7 @@ class _ResultScreenState extends State<ResultScreen> {
                                     vertical: 8,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: Theme.of(context)
-                                        .scaffoldBackgroundColor,
+                                    color: Theme.of(context).scaffoldBackgroundColor,
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                   child: Text(
@@ -1406,9 +1311,7 @@ class _ResultScreenState extends State<ResultScreen> {
                                     style: TextStyle(
                                       fontWeight: FontWeights.bold,
                                       fontSize: 18,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onTertiary,
+                                      color: Theme.of(context).colorScheme.onTertiary,
                                     ),
                                   ),
                                 ),
@@ -1450,9 +1353,7 @@ class _ResultScreenState extends State<ResultScreen> {
                                       child: SvgPicture.asset(
                                         Assets.hexagonFrame,
                                         colorFilter: ColorFilter.mode(
-                                          Theme.of(context)
-                                              .colorScheme
-                                              .onTertiary,
+                                          Theme.of(context).colorScheme.onTertiary,
                                           BlendMode.srcIn,
                                         ),
                                         width: 90,
@@ -1470,9 +1371,7 @@ class _ResultScreenState extends State<ResultScreen> {
                                   style: TextStyle(
                                     fontWeight: FontWeights.bold,
                                     fontSize: 16,
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onTertiary,
+                                    color: Theme.of(context).colorScheme.onTertiary,
                                   ),
                                 ),
                                 const SizedBox(height: 10),
@@ -1482,8 +1381,7 @@ class _ResultScreenState extends State<ResultScreen> {
                                     vertical: 8,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: Theme.of(context)
-                                        .scaffoldBackgroundColor,
+                                    color: Theme.of(context).scaffoldBackgroundColor,
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                   child: Text(
@@ -1491,9 +1389,7 @@ class _ResultScreenState extends State<ResultScreen> {
                                     style: TextStyle(
                                       fontWeight: FontWeights.bold,
                                       fontSize: 18,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onTertiary,
+                                      color: Theme.of(context).colorScheme.onTertiary,
                                     ),
                                   ),
                                 ),
@@ -1510,8 +1406,7 @@ class _ResultScreenState extends State<ResultScreen> {
   }
 
   Widget _buildResultDetails(BuildContext context) {
-    final userProfileUrl =
-        context.read<UserDetailsCubit>().getUserProfile().profileUrl ?? '';
+    final userProfileUrl = context.read<UserDetailsCubit>().getUserProfile().profileUrl ?? '';
 
     //build results for 1 user
     if (widget.numberOfPlayer == 1) {
@@ -1530,9 +1425,7 @@ class _ResultScreenState extends State<ResultScreen> {
         height: context.height * (0.560),
         width: context.width * (0.90),
         decoration: BoxDecoration(
-          color: _isWinner
-              ? Theme.of(context).colorScheme.surface
-              : Theme.of(context).colorScheme.onTertiary.withValues(alpha: .05),
+          color: _isWinner ? Theme.of(context).colorScheme.surface : Theme.of(context).colorScheme.onTertiary.withValues(alpha: .05),
           borderRadius: BorderRadius.circular(10),
         ),
         child: _buildResultDetails(context),
@@ -1579,12 +1472,8 @@ class _ResultScreenState extends State<ResultScreen> {
               'numberOfPlayer': 1,
               'isPlayed': widget.isPlayed,
               'quizType': QuizTypes.audioQuestions,
-              'subcategoryId': widget.questions!.first.subcategoryId == '0'
-                  ? ''
-                  : widget.questions!.first.subcategoryId,
-              'categoryId': widget.questions!.first.subcategoryId == '0'
-                  ? widget.questions!.first.categoryId
-                  : '',
+              'subcategoryId': widget.questions!.first.subcategoryId == '0' ? '' : widget.questions!.first.subcategoryId,
+              'categoryId': widget.questions!.first.subcategoryId == '0' ? widget.questions!.first.categoryId : '',
             },
           );
         },
@@ -1603,12 +1492,8 @@ class _ResultScreenState extends State<ResultScreen> {
             Routes.guessTheWord,
             arguments: {
               'isPlayed': widget.isPlayed,
-              'type': widget.guessTheWordQuestions!.first.subcategory == '0'
-                  ? 'category'
-                  : 'subcategory',
-              'typeId': widget.guessTheWordQuestions!.first.subcategory == '0'
-                  ? widget.guessTheWordQuestions!.first.category
-                  : widget.guessTheWordQuestions!.first.subcategory,
+              'type': widget.guessTheWordQuestions!.first.subcategory == '0' ? 'category' : 'subcategory',
+              'typeId': widget.guessTheWordQuestions!.first.subcategory == '0' ? widget.guessTheWordQuestions!.first.category : widget.guessTheWordQuestions!.first.subcategory,
             },
           );
         },
@@ -1630,10 +1515,7 @@ class _ResultScreenState extends State<ResultScreen> {
           () {
             //if given level is same as unlocked level then we need to update level
             //else do not update level
-            final unlockedLevel = int.parse(widget.questions!.first.level!) ==
-                    widget.unlockedLevel
-                ? (widget.unlockedLevel! + 1)
-                : widget.unlockedLevel;
+            final unlockedLevel = int.parse(widget.questions!.first.level!) == widget.unlockedLevel ? (widget.unlockedLevel! + 1) : widget.unlockedLevel;
             //play quiz for next level
             Navigator.of(context).pushReplacementNamed(
               Routes.quiz,
@@ -1700,9 +1582,7 @@ class _ResultScreenState extends State<ResultScreen> {
 
               final appLink = context.read<SystemConfigCubit>().appUrl;
 
-              final referralCode =
-                  context.read<UserDetailsCubit>().getUserProfile().referCode ??
-                      '';
+              final referralCode = context.read<UserDetailsCubit>().getUserProfile().referCode ?? '';
 
               final scoreText = '$appName'
                   "\n${context.tr('myScoreLbl')!}"
@@ -1738,11 +1618,9 @@ class _ResultScreenState extends State<ResultScreen> {
 
   Widget _buildReviewAnswersButton() {
     void onTapYesReviewAnswers() {
-      final reviewAnswersDeductCoins =
-          context.read<SystemConfigCubit>().reviewAnswersDeductCoins;
+      final reviewAnswersDeductCoins = context.read<SystemConfigCubit>().reviewAnswersDeductCoins;
       //check if user has enough coins
-      if (int.parse(context.read<UserDetailsCubit>().getCoins()!) <
-          reviewAnswersDeductCoins) {
+      if (int.parse(context.read<UserDetailsCubit>().getCoins()!) < reviewAnswersDeductCoins) {
         UiUtils.errorMessageDialog(
           context,
           context.tr(notEnoughCoinsKey),
@@ -1855,8 +1733,7 @@ class _ResultScreenState extends State<ResultScreen> {
 
     return Column(
       children: [
-        if (widget.quizType! != QuizTypes.exam &&
-            widget.quizType != QuizTypes.oneVsOneBattle) ...[
+        if (widget.quizType! != QuizTypes.exam && widget.quizType != QuizTypes.oneVsOneBattle) ...[
           _buildPlayAgainButton(),
           buttonSpace,
         ],
@@ -1900,8 +1777,7 @@ class _ResultScreenState extends State<ResultScreen> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop:
-          context.read<UserDetailsCubit>().state is! UserDetailsFetchInProgress,
+      canPop: context.read<UserDetailsCubit>().state is! UserDetailsFetchInProgress,
       onPopInvokedWithResult: (didPop, _) {
         if (didPop) return;
 

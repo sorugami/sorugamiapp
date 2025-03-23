@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -97,6 +95,8 @@ class _MultiUserBattleRoomResultScreenState extends State<MultiUserBattleRoomRes
           scoreToAdd = (userDetails['user'] as UserBattleRoomDetails).correctAnswers * 2; // Diğer kullanıcılar için puan
         }
 
+        userDetails['score'] = scoreToAdd;
+
         // Puan güncellemesi
         if ((userDetails['user'] as UserBattleRoomDetails).uid == context.read<UserDetailsCubit>().userId()) {
           context.read<UpdateScoreAndCoinsCubit>().updateScore(scoreToAdd);
@@ -111,6 +111,7 @@ class _MultiUserBattleRoomResultScreenState extends State<MultiUserBattleRoomRes
   Widget _buildUserDetailsContainer(
     UserBattleRoomDetails userBattleRoomDetails,
     int rank,
+    int score,
     Size size,
     bool showStars,
     AlignmentGeometry alignment,
@@ -164,13 +165,26 @@ class _MultiUserBattleRoomResultScreenState extends State<MultiUserBattleRoomRes
                 color: Theme.of(context).scaffoldBackgroundColor,
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Text(
-                '${userBattleRoomDetails.correctAnswers}/${widget.totalQuestions}',
-                style: TextStyle(
-                  fontWeight: FontWeights.bold,
-                  fontSize: 14,
-                  color: Theme.of(context).colorScheme.onTertiary,
-                ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '${userBattleRoomDetails.correctAnswers}/${widget.totalQuestions}',
+                    style: TextStyle(
+                      fontWeight: FontWeights.bold,
+                      fontSize: 14,
+                      color: Theme.of(context).colorScheme.onTertiary,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Puan: $score', // 👈 puanı göster
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Theme.of(context).colorScheme.onTertiary,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -182,6 +196,7 @@ class _MultiUserBattleRoomResultScreenState extends State<MultiUserBattleRoomRes
   Widget _buildUserTopDetailsContainer(
     UserBattleRoomDetails userBattleRoomDetails,
     int rank,
+    int score,
     Size size,
     bool showStars,
     AlignmentGeometry alignment,
@@ -231,13 +246,26 @@ class _MultiUserBattleRoomResultScreenState extends State<MultiUserBattleRoomRes
                 color: Theme.of(context).scaffoldBackgroundColor,
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Text(
-                '${userBattleRoomDetails.correctAnswers}/${widget.totalQuestions}',
-                style: TextStyle(
-                  fontWeight: FontWeights.bold,
-                  fontSize: 18,
-                  color: Theme.of(context).colorScheme.onTertiary,
-                ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '${userBattleRoomDetails.correctAnswers}/${widget.totalQuestions}',
+                    style: TextStyle(
+                      fontWeight: FontWeights.bold,
+                      fontSize: 14,
+                      color: Theme.of(context).colorScheme.onTertiary,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Score: $score', // 👈 puanı göster
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Theme.of(context).colorScheme.onTertiary,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -284,6 +312,7 @@ class _MultiUserBattleRoomResultScreenState extends State<MultiUserBattleRoomRes
                     _buildUserTopDetailsContainer(
                       usersWithRank.first['user'] as UserBattleRoomDetails,
                       usersWithRank.first['rank'] as int,
+                      usersWithRank.first['score'] as int,
                       Size(
                         context.width * (0.475),
                         context.height * (0.35),
@@ -302,6 +331,7 @@ class _MultiUserBattleRoomResultScreenState extends State<MultiUserBattleRoomRes
                       _buildUserDetailsContainer(
                         usersWithRank[1]['user'] as UserBattleRoomDetails,
                         usersWithRank[1]['rank'] as int,
+                        usersWithRank[1]['score'] as int,
                         Size(
                           context.width * (0.15),
                           context.height * (0.08),
@@ -315,6 +345,7 @@ class _MultiUserBattleRoomResultScreenState extends State<MultiUserBattleRoomRes
                       _buildUserDetailsContainer(
                         usersWithRank[1]['user'] as UserBattleRoomDetails,
                         usersWithRank[1]['rank'] as int,
+                        usersWithRank[1]['score'] as int,
                         Size(
                           context.width * (0.38),
                           context.height * (0.28),
@@ -334,6 +365,7 @@ class _MultiUserBattleRoomResultScreenState extends State<MultiUserBattleRoomRes
                       _buildUserDetailsContainer(
                         usersWithRank[2]['user'] as UserBattleRoomDetails,
                         usersWithRank[2]['rank'] as int,
+                        usersWithRank[2]['score'] as int,
                         Size(
                           context.width * (0.36),
                           context.height * (0.25),
@@ -356,6 +388,7 @@ class _MultiUserBattleRoomResultScreenState extends State<MultiUserBattleRoomRes
                       _buildUserDetailsContainer(
                         usersWithRank.last['user'] as UserBattleRoomDetails,
                         usersWithRank.last['rank'] as int,
+                        usersWithRank.last['score'] as int,
                         Size(
                           context.width * (0.35),
                           context.height * (0.25),

@@ -35,8 +35,6 @@ class UserDetailsCubit extends Cubit<UserDetailsState> {
   UserDetailsCubit(this._profileManagementRepository) : super(UserDetailsInitial());
   final ProfileManagementRepository _profileManagementRepository;
 
-  final FirebaseFirestore _firebaseFirestore = FirebaseFirestore.instance;
-
   Future<List<InformationModel>> fetchAllInformations() async {
     List<InformationModel> allInformations = [];
     final collection = FirebaseFirestore.instance.collection('informations');
@@ -67,9 +65,7 @@ class UserDetailsCubit extends Cubit<UserDetailsState> {
 
   //
   // ignore: avoid_bool_literals_in_conditional_expressions
-  bool get isDailyAdAvailable => (state is UserDetailsFetchSuccess)
-      ? (state as UserDetailsFetchSuccess).userProfile.isDailyAdsAvailable ?? false
-      : false;
+  bool get isDailyAdAvailable => (state is UserDetailsFetchSuccess) ? (state as UserDetailsFetchSuccess).userProfile.isDailyAdsAvailable ?? false : false;
 
   Future<bool> watchedDailyAd() async {
     return _profileManagementRepository.watchedDailyAd();
@@ -79,14 +75,11 @@ class UserDetailsCubit extends Cubit<UserDetailsState> {
 
   String userId() => state is UserDetailsFetchSuccess ? (state as UserDetailsFetchSuccess).userProfile.userId! : '';
 
-  String getUserFirebaseId() =>
-      state is UserDetailsFetchSuccess ? (state as UserDetailsFetchSuccess).userProfile.firebaseId! : '';
+  String getUserFirebaseId() => state is UserDetailsFetchSuccess ? (state as UserDetailsFetchSuccess).userProfile.firebaseId! : '';
 
-  String? getUserMobile() =>
-      state is UserDetailsFetchSuccess ? (state as UserDetailsFetchSuccess).userProfile.mobileNumber : '';
+  String? getUserMobile() => state is UserDetailsFetchSuccess ? (state as UserDetailsFetchSuccess).userProfile.mobileNumber : '';
 
-  String? getUserEmail() =>
-      state is UserDetailsFetchSuccess ? (state as UserDetailsFetchSuccess).userProfile.email : '';
+  String? getUserEmail() => state is UserDetailsFetchSuccess ? (state as UserDetailsFetchSuccess).userProfile.email : '';
 
   void updateUserProfileUrl(String profileUrl) {
     if (state is UserDetailsFetchSuccess) {
@@ -160,14 +153,11 @@ class UserDetailsCubit extends Cubit<UserDetailsState> {
 
   String? getCoins() => state is UserDetailsFetchSuccess ? (state as UserDetailsFetchSuccess).userProfile.coins : '0';
 
-  UserProfile getUserProfile() =>
-      state is UserDetailsFetchSuccess ? (state as UserDetailsFetchSuccess).userProfile : UserProfile();
+  UserProfile getUserProfile() => state is UserDetailsFetchSuccess ? (state as UserDetailsFetchSuccess).userProfile : UserProfile();
 
   //
   // ignore: avoid_bool_literals_in_conditional_expressions
-  bool removeAds() => state is UserDetailsFetchSuccess
-      ? (state as UserDetailsFetchSuccess).userProfile.adsRemovedForUser == '1'
-      : false;
+  bool removeAds() => state is UserDetailsFetchSuccess ? (state as UserDetailsFetchSuccess).userProfile.adsRemovedForUser == '1' : false;
 
   Future<({int total, List<Map<String, dynamic>> otherUsersRanks})> _fetchData({
     required String limit,
